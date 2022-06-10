@@ -7,7 +7,7 @@ import wandb
 
 from torch.utils import data
 from transformers import AutoModel, AdamW, get_linear_schedule_with_warmup
-from torch.cuda import amp
+from torch.cuda.amp import GradScaler, autocast
 
 # map lm name to huggingface's pre-trained model names
 lm_mp = {
@@ -120,26 +120,27 @@ def train_step(train_iter, model, optimizer, scheduler, hp):
         None
     """
     criterion = nn.CrossEntropyLoss()
+    scaler = GradScaler(enabled=hp.fp16)
+
     # criterion = nn.MSELoss()
     for i, batch in enumerate(train_iter):
         optimizer.zero_grad()
 
-        if len(batch) == 2:
-            x, y = batch
-            prediction = model(x)
-        else:
-            x1, x2, y = batch
-            prediction = model(x1, x2)
+        with autocast(enabled=hp.fp16):
+            if len(batch) == 2:
+                x, y = batch
+                prediction = model(x)
+            else:
+                x1, x2, y = batch
+                prediction = model(x1, x2)
 
-        loss = criterion(prediction, y.to(model.device))
+            loss = criterion(prediction, y.to(model.device))
 
-        if hp.fp16:
-            with amp.scale_loss(loss, optimizer) as scaled_loss:
-                scaled_loss.backward()
-        else:
-            loss.backward()
-        optimizer.step()
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
         scheduler.step()
+
         if i % 10 == 0:  # monitoring
             print(f"step: {i}, loss: {loss.item()}")
         del loss
@@ -189,8 +190,6 @@ def train(trainset, validset, testset, hp):
     model = model.cuda()
     optimizer = AdamW(model.parameters(), lr=hp.lr)
 
-    if hp.fp16:
-        model, optimizer = amp.initialize(model, optimizer, opt_level="O2")
     num_steps = (len(trainset) // hp.batch_size) * hp.n_epochs
     scheduler = get_linear_schedule_with_warmup(
         optimizer, num_warmup_steps=0, num_training_steps=num_steps
