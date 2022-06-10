@@ -6,7 +6,8 @@ import sklearn.metrics as metrics
 import wandb
 
 from torch.utils import data
-from transformers import AutoModel, AdamW, get_linear_schedule_with_warmup
+from torch.optim import AdamW
+from transformers import AutoModel, get_linear_schedule_with_warmup
 from torch.cuda.amp import GradScaler, autocast
 
 # map lm name to huggingface's pre-trained model names
