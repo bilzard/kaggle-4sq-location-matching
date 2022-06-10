@@ -11,6 +11,7 @@ lm_mp = {
     "xlmr-large": "xlm-roberta-large",
     "xlmr-xl": "facebook/xlm-roberta-xl",
     "xlmr-xxl": "facebook/xlm-roberta-xxl",
+    "multilingual-bert-cased": "bert-base-multilingual-cased",
 }
 
 
