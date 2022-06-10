@@ -7,7 +7,7 @@ import wandb
 
 from torch.utils import data
 from transformers import AutoModel, AdamW, get_linear_schedule_with_warmup
-from apex import amp
+from torch.cuda import amp
 
 # map lm name to huggingface's pre-trained model names
 lm_mp = {

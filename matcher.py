@@ -11,7 +11,7 @@ import sklearn
 
 from torch.utils import data
 from tqdm import tqdm
-from apex import amp
+from torch.cuda import amp
 from scipy.special import softmax
 
 from ditto_light.ditto import evaluate, DittoModel
