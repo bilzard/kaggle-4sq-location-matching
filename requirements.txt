@@ -1,3 +1,4 @@
 wandb==0.12.18
 transformers==4.19.3
 sentencepiece==0.1.96
+sacremoses==0.0.53
