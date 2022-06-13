@@ -132,6 +132,7 @@ def train_step(train_iter, model, optimizer, scheduler, hp):
     scaler = GradScaler(enabled=hp.fp16)
 
     # criterion = nn.MSELoss()
+    mean_loss = 0
     for i, batch in enumerate(train_iter):
         optimizer.zero_grad()
 
@@ -152,7 +153,10 @@ def train_step(train_iter, model, optimizer, scheduler, hp):
 
         if i % 10 == 0:  # monitoring
             print(f"step: {i}, loss: {loss.item()}")
+            wandb.log(dict(instance=(i + 1) * hp.batch_size, loss=loss.item()))
+        mean_loss += loss.item() / train_iter
         del loss
+    return mean_loss
 
 
 def train(trainset, validset, testset, hp):
@@ -210,7 +214,7 @@ def train(trainset, validset, testset, hp):
     for epoch in range(1, hp.n_epochs + 1):
         # train
         model.train()
-        train_step(train_iter, model, optimizer, scheduler, hp)
+        loss = train_step(train_iter, model, optimizer, scheduler, hp)
 
         # eval
         model.eval()
@@ -238,15 +242,16 @@ def train(trainset, validset, testset, hp):
 
         # logging
         scalars = {
-            "f1": dev_f1,
-            "recall": dev_recall,
-            "precision": dev_precision,
-            "t_f1": test_f1,
-            "t_recall": test_recall,
-            "t_precision": test_precision,
+            "val/f1": dev_f1,
+            "val/recall": dev_recall,
+            "val/precision": dev_precision,
+            "test/f1": test_f1,
+            "test/recall": test_recall,
+            "test/precision": test_precision,
+            "train/loss": loss,
         }
         print(
-            f"epoch {epoch}: best_t_f1: {best_test_f1:.3f}"
+            f"epoch {epoch}: test/best_f1: {best_test_f1:.3f}"
             + " ".join([f"{k}={v:.3f}" for k, v in scalars.items()])
         )
         wandb.log(dict(**scalars, epoch=epoch))
