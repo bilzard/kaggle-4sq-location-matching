@@ -133,6 +133,7 @@ def train_step(train_iter, model, optimizer, scheduler, hp):
 
     # criterion = nn.MSELoss()
     mean_loss = 0
+    num_iter = len(train_iter)
     for i, batch in enumerate(train_iter):
         optimizer.zero_grad()
 
@@ -154,7 +155,7 @@ def train_step(train_iter, model, optimizer, scheduler, hp):
         if i % 10 == 0:  # monitoring
             print(f"step: {i}, loss: {loss.item()}")
             wandb.log(dict(instance=(i + 1) * hp.batch_size, loss=loss.item()))
-        mean_loss += loss.item() / train_iter
+        mean_loss += loss.item() / num_iter
         del loss
     return mean_loss
 
