@@ -194,7 +194,7 @@ def train(trainset, validset, testset, hp):
 
     num_steps = (len(trainset) // hp.batch_size) * hp.n_epochs
     scheduler = get_linear_schedule_with_warmup(
-        optimizer, num_warmup_steps=0, num_training_steps=num_steps
+        optimizer, num_warmup_steps=hp.warmup, num_training_steps=num_steps
     )
 
     best_dev_f1 = best_test_f1 = 0.0
