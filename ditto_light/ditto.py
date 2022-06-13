@@ -197,6 +197,8 @@ def train(trainset, validset, testset, hp):
         optimizer, num_warmup_steps=hp.warmup, num_training_steps=num_steps
     )
 
+    wandb.watch(model, log_freq=100)
+
     best_dev_f1 = best_test_f1 = 0.0
     for epoch in range(1, hp.n_epochs + 1):
         # train
