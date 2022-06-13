@@ -46,12 +46,13 @@ if __name__ == "__main__":
     task = hp.task
 
     # create the tag of the run
-    run_tag = "%s_lm=%s_da=%s_dk=%s_su=%s_size=%s_id=%d" % (
+    run_tag = "%s_lm=%s_da=%s_dk=%s_su=%s_wu=%s_size=%s_id=%d" % (
         task,
         hp.lm,
         hp.da,
         hp.dk,
         hp.summarize,
+        hp.warmup_steps,
         str(hp.size),
         hp.run_id,
     )
