@@ -154,7 +154,7 @@ def train_step(train_iter, model, optimizer, scheduler, hp):
 
         if i % 10 == 0:  # monitoring
             print(f"step: {i}, loss: {loss.item()}")
-            wandb.log(dict(instance=(i + 1) * hp.batch_size, loss=loss.item()))
+            wandb.log({"train/loss": loss.item()})
         mean_loss += loss.item() / num_iter
         del loss
     return mean_loss
@@ -249,7 +249,7 @@ def train(trainset, validset, testset, hp):
             "test/f1": test_f1,
             "test/recall": test_recall,
             "test/precision": test_precision,
-            "train/loss": loss,
+            "train/loss_epoch": loss,
         }
         print(
             f"epoch {epoch}: test/best_f1: {best_test_f1:.3f}"
