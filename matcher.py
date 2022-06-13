@@ -214,7 +214,7 @@ def tune_threshold(config, model, hp):
 
     # acc, prec, recall, f1, v_loss, th = eval_classifier(model, valid_iter,
     #                                                     get_threshold=True)
-    f1, th = evaluate(model, valid_iter, threshold=None)
+    f1, th, _, _ = evaluate(model, valid_iter, threshold=None)
 
     # verify F1
     set_seed(123)
