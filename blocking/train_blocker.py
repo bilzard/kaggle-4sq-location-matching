@@ -1,3 +1,4 @@
+import gzip
 import os
 import argparse
 import math
@@ -10,39 +11,45 @@ from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
 from torch.utils.data import DataLoader
 
 
-class TrainReader:
+class Reader:
+    def get_examples(self, fn):
+        fopen_func = gzip.open if fn.endswith(".gz") else open
+        with fopen_func(fn, "rt") as fp:
+            return self.process_file(fp)
+
+    def process_file(self, fp):
+        raise NotImplementedError()
+
+
+class TrainReader(Reader):
     """A simple reader class for the matching datasets."""
 
     def __init__(self):
         self.guid = 0
 
-    # TODO: should be more efficient for a large text input
-    def get_examples(self, fn):
+    def process_file(self, fp):
         examples = []
-        with open(fn) as file:
-            for line in file:
-                sent1, sent2, label = line.strip().split("\t")
-                examples.append(
-                    InputExample(guid=self.guid, texts=[sent1, sent2], label=int(label))
-                )
-                self.guid += 1
+        for line in fp:
+            sent1, sent2, label = line.strip().split("\t")
+            examples.append(
+                InputExample(guid=self.guid, texts=[sent1, sent2], label=int(label))
+            )
+            self.guid += 1
         return examples
 
 
-class EvalReader:
+class EvalReader(Reader):
     """A simple reader class for the matching datasets for eval."""
 
-    # TODO: should be more efficient for a large text input
-    def get_examples(self, fn):
+    def process_file(self, fp):
         sentences1 = []
         sentences2 = []
         scores = []
-        with open(fn) as file:
-            for line in file:
-                sent1, sent2, label = line.strip().split("\t")
-                sentences1.append(sent1)
-                sentences2.append(sent2)
-                scores.append(int(label))
+        for line in fp:
+            sent1, sent2, label = line.strip().split("\t")
+            sentences1.append(sent1)
+            sentences2.append(sent2)
+            scores.append(int(label))
         return sentences1, sentences2, scores
 
 
