@@ -2,6 +2,7 @@ import gzip
 import os
 import argparse
 import math
+import wandb
 
 from sentence_transformers.readers import InputExample
 from sentence_transformers import models, losses
@@ -143,4 +144,9 @@ if __name__ == "__main__":
     parser.add_argument("--max_seq_length", type=int, default=None)
     hp = parser.parse_args()
 
-    train(hp)
+    # create the tag of the run
+    run_tag = "lm=%s" % (hp.lm)
+    run_tag = run_tag.replace("/", "_")
+
+    with wandb.init(project="4sq-blocker", name=run_tag, config=vars(hp)):
+        train(hp)
