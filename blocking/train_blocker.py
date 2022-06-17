@@ -103,10 +103,7 @@ def train(hp):
     dev_reader = EvalReader()
     sentences1, sentences2, scores = dev_reader.get_examples(hp.valid_fn)
     evaluator = EmbeddingSimilarityEvaluator(
-        sentences1,
-        sentences2,
-        scores,
-        batch_size=hp.batch_size,
+        sentences1, sentences2, scores, batch_size=hp.batch_size, show_progress_bar=True
     )
 
     warmup_steps = math.ceil(
