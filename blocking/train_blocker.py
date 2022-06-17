@@ -120,7 +120,7 @@ def train(hp):
         train_objectives=[(train_dataloader, train_loss)],
         evaluator=evaluator,
         epochs=hp.n_epochs,
-        evaluation_steps=1000,
+        evaluation_steps=hp.evaluation_steps,
         warmup_steps=warmup_steps,
         output_path=hp.model_fn,
         use_amp=hp.fp16,
@@ -142,6 +142,8 @@ if __name__ == "__main__":
     parser.add_argument("--lm", type=str, default="distilbert")
     parser.add_argument("--fp16", dest="fp16", action="store_true")
     parser.add_argument("--max_seq_length", type=int, default=None)
+    parser.add_argument("--evaluation_steps", type=int, default=1000)
+
     hp = parser.parse_args()
 
     # create the tag of the run
