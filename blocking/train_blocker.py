@@ -147,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument("--lm", type=str, default="distilbert")
     parser.add_argument("--fp16", dest="fp16", action="store_true")
     parser.add_argument("--max_seq_length", type=int, default=None)
-    parser.add_argument("--evaluation_steps", type=int, default=1000)
+    parser.add_argument("--evaluation_steps", type=int, default=0)
 
     hp = parser.parse_args()
 
