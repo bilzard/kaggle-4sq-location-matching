@@ -115,6 +115,10 @@ def train(hp):
 
         shutil.rmtree(hp.model_fn)
 
+    def eval_callback(score, epoch, steps):
+        print(f"epoch {epoch} ({steps} steps): val/score={score}")
+        wandb.log({"epoch": epoch, "steps": steps, "val/score": score})
+
     # Train the model
     model.fit(
         train_objectives=[(train_dataloader, train_loss)],
@@ -124,6 +128,7 @@ def train(hp):
         warmup_steps=warmup_steps,
         output_path=hp.model_fn,
         use_amp=hp.fp16,
+        callback=eval_callback,
     )
 
 
