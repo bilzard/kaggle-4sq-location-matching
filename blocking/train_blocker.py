@@ -19,12 +19,13 @@ class TrainReader:
     # TODO: should be more efficient for a large text input
     def get_examples(self, fn):
         examples = []
-        for line in open(fn):
-            sent1, sent2, label = line.strip().split("\t")
-            examples.append(
-                InputExample(guid=self.guid, texts=[sent1, sent2], label=int(label))
-            )
-            self.guid += 1
+        with open(fn) as file:
+            for line in file:
+                sent1, sent2, label = line.strip().split("\t")
+                examples.append(
+                    InputExample(guid=self.guid, texts=[sent1, sent2], label=int(label))
+                )
+                self.guid += 1
         return examples
 
 
@@ -36,11 +37,12 @@ class EvalReader:
         sentences1 = []
         sentences2 = []
         scores = []
-        for line in open(fn):
-            sent1, sent2, label = line.strip().split("\t")
-            sentences1.append(sent1)
-            sentences2.append(sent2)
-            scores.append(int(label))
+        with open(fn) as file:
+            for line in file:
+                sent1, sent2, label = line.strip().split("\t")
+                sentences1.append(sent1)
+                sentences2.append(sent2)
+                scores.append(int(label))
         return sentences1, sentences2, scores
 
 
