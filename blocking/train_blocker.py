@@ -69,12 +69,11 @@ def train(hp):
         "distilbert": "distilbert-base-uncased",
         "bert": "bert-base-uncased",
         "albert": "albert-base-v2",
-        "distil-multi-v1": "sentence-transformers/distiluse-base-multilingual-cased-v1",
-        "distil-multi-v2": "sentence-transformers/distiluse-base-multilingual-cased-v2",
-        "paraphrase-multi-MiniLM-L12-v2": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-        "paraphrase-multi-mpnet-v2": "sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
-        "paraphrase-xlm-r-multi-v1": "sentence-transformers/paraphrase-xlm-r-multilingual-v1",
-        "stsb-xlm-r-multi": "sentence-transformers/stsb-xlm-r-multilingual",
+        "stsb-xlm-r-multilingual": "sentence-transformers/stsb-xlm-r-multilingual",
+        "all-mpnet-base-v2": "sentence-transformers/all-mpnet-base-v2",
+        "all-distilroberta-v1": "sentence-transformers/all-distilroberta-v1",
+        "all-MiniLM-L6-v2": "sentence-transformers/all-MiniLM-L6-v2",
+        "all-MiniLM-L12-v2": "sentence-transformers/all-MiniLM-L12-v2",
     }
 
     word_embedding_model = models.Transformer(
