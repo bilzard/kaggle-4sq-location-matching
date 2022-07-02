@@ -228,6 +228,7 @@ def train(trainset, validset, hp):
                     "epoch": epoch,
                 }
                 torch.save(ckpt, ckpt_path)
+                wandb.save(ckpt_path)
 
         # logging
         scalars = {
