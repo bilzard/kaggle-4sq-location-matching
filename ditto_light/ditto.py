@@ -39,6 +39,8 @@ class DittoModel(nn.Module):
     def __init__(self, device="cuda", lm="xlmr-base", alpha_aug=0.8):
         super().__init__()
         if lm in lm_mp:
+            print(lm)
+            print(lm_mp[lm])
             self.bert = AutoModel.from_pretrained(lm_mp[lm])
         else:
             self.bert = AutoModel.from_pretrained(lm)
