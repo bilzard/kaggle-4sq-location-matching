@@ -1,4 +1,6 @@
+import math
 import os
+
 import torch
 import torch.nn as nn
 import numpy as np
@@ -207,9 +209,12 @@ def train(trainset, validset, testset, hp):
     model = model.cuda()
     optimizer = AdamW(model.parameters(), lr=hp.lr)
 
+    # 10% of train data for warm-up
+    warmup_steps = math.ceil(len(train_iter) * hp.n_epochs / hp.batch_size * 0.1)
+
     num_steps = (len(trainset) // hp.batch_size) * hp.n_epochs
     scheduler = get_linear_schedule_with_warmup(
-        optimizer, num_warmup_steps=hp.warmup_steps, num_training_steps=num_steps
+        optimizer, num_warmup_steps=warmup_steps, num_training_steps=num_steps
     )
 
     best_dev_score = best_test_score = 0.0

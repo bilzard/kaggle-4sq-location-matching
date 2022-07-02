@@ -30,7 +30,6 @@ if __name__ == "__main__":
     parser.add_argument("--dk", type=str, default=None)
     parser.add_argument("--summarize", dest="summarize", action="store_true")
     parser.add_argument("--size", type=int, default=None)
-    parser.add_argument("--warmup_steps", type=int, default=0)
 
     hp = parser.parse_args()
 
@@ -46,13 +45,12 @@ if __name__ == "__main__":
     task = hp.task
 
     # create the tag of the run
-    run_tag = "%s_lm=%s_da=%s_dk=%s_su=%s_wu=%s_size=%s_id=%d" % (
+    run_tag = "%s_lm=%s_da=%s_dk=%s_su=%s_size=%s_id=%d" % (
         task,
         hp.lm,
         hp.da,
         hp.dk,
         hp.summarize,
-        hp.warmup_steps,
         str(hp.size),
         hp.run_id,
     )
