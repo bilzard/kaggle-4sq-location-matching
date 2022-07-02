@@ -239,7 +239,7 @@ def train(trainset, validset, testset, hp):
                     os.makedirs(hp.logdir)
 
                 # save the checkpoints for each component
-                ckpt_path = os.path.join(hp.logdir, f"model_{hp.task}.pt")
+                ckpt_path = os.path.join(hp.logdir, f"model_{hp.run_tag}.pt")
                 ckpt = {
                     "model": model.state_dict(),
                     "optimizer": optimizer.state_dict(),

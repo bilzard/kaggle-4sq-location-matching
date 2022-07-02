@@ -20,6 +20,12 @@ def make_task_name(path):
     return path.split("/")[-1].split(".")[0]
 
 
+def make_run_tag(hp):
+    run_tag = f"{hp.task}_{hp.lm}_ep{hp.n_epochs}id{hp.run_id}"
+    run_tag = run_tag.replace("/", "_")
+    return run_tag
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("train_path", type=str)
@@ -55,13 +61,7 @@ if __name__ == "__main__":
     hp.task = make_task_name(hp.train_path)
 
     # create the tag of the run
-    run_tag = "%s_%s_ep%did%d" % (
-        hp.task,
-        hp.lm,
-        hp.n_epochs,
-        hp.run_id,
-    )
-    run_tag = run_tag.replace("/", "_")
+    hp.run_tag = make_run_tag(hp)
 
     # load train/dev/test sets
     train_dataset = DittoDataset(
@@ -71,5 +71,5 @@ if __name__ == "__main__":
     test_dataset = DittoDataset(hp.test_path, lm=hp.lm)
 
     # train and evaluate the model
-    with wandb.init(project="4sq", name=run_tag, config=vars(hp)):
+    with wandb.init(project="4sq", name=hp.run_tag, config=vars(hp)):
         train(train_dataset, valid_dataset, test_dataset, hp)
