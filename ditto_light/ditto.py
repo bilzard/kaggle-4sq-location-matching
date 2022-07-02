@@ -86,7 +86,7 @@ def evaluate(model, iterator, threshold=None):
     all_y = []
     all_probs = []
     with torch.no_grad():
-        for batch in iterator:
+        for batch in tqdm(iterator, desc="Evaluate"):
             x, y = batch
             logits = model(x)
             probs = logits.softmax(dim=1)[:, 1]
@@ -160,7 +160,7 @@ def train_step(train_iter, model, optimizer, scheduler, hp, monitor_step=10):
         scheduler.step()
 
         if i % monitor_step == 0:
-            pbar.set_description(f"Train loss (running): {loss.item():.4f}")
+            pbar.set_description(f"Train[loss={loss.item():.4f}]")
             wandb.log({"train/loss": loss.item()})
         mean_loss += loss.item() / num_iter
         del loss
