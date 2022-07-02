@@ -167,13 +167,12 @@ def train_step(train_iter, model, optimizer, scheduler, hp, monitor_step=10):
     return mean_loss
 
 
-def train(trainset, validset, testset, hp):
+def train(trainset, validset, hp):
     """Train and evaluate the model
 
     Args:
         trainset (DittoDataset): the training set
         validset (DittoDataset): the validation set
-        testset (DittoDataset): the test set
         run_tag (str): the tag of the run
         hp (Namespace): Hyper-parameters (e.g., batch_size,
                         learning rate, fp16)
@@ -192,13 +191,6 @@ def train(trainset, validset, testset, hp):
     )
     valid_iter = data.DataLoader(
         dataset=validset,
-        batch_size=hp.batch_size * 16,
-        shuffle=False,
-        num_workers=0,
-        collate_fn=padder,
-    )
-    test_iter = data.DataLoader(
-        dataset=testset,
         batch_size=hp.batch_size * 16,
         shuffle=False,
         num_workers=0,

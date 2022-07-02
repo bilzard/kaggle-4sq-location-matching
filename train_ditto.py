@@ -30,7 +30,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("train_path", type=str)
     parser.add_argument("val_path", type=str)
-    parser.add_argument("test_path", type=str)
     parser.add_argument("--run_id", type=int, default=0)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--max_len", type=int, default=256)
@@ -68,8 +67,7 @@ if __name__ == "__main__":
         hp.train_path, lm=hp.lm, max_len=hp.max_len, size=hp.size, da=hp.da
     )
     valid_dataset = DittoDataset(hp.val_path, lm=hp.lm)
-    test_dataset = DittoDataset(hp.test_path, lm=hp.lm)
 
     # train and evaluate the model
     with wandb.init(project="4sq", name=hp.run_tag, config=vars(hp)):
-        train(train_dataset, valid_dataset, test_dataset, hp)
+        train(train_dataset, valid_dataset, hp)
