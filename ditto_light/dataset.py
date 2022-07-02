@@ -5,21 +5,12 @@ import torch
 from torch.utils import data
 from transformers import AutoTokenizer
 
-# map lm name to huggingface's pre-trained model names
-lm_mp = {
-    "roberta": "roberta-base",
-    "distilbert": "distilbert-base-uncased",
-    "xlmr-base": "xlm-roberta-base",
-    "xlmr-large": "xlm-roberta-large",
-    "xlmr-xl": "facebook/xlm-roberta-xl",
-    "xlmr-xxl": "facebook/xlm-roberta-xxl",
-    "multilingual-bert-cased": "bert-base-multilingual-cased",
-}
+from config.model_alias import model_alias
 
 
 def get_tokenizer(lm):
-    if lm in lm_mp:
-        return AutoTokenizer.from_pretrained(lm_mp[lm])
+    if lm in model_alias:
+        return AutoTokenizer.from_pretrained(model_alias[lm])
     else:
         return AutoTokenizer.from_pretrained(lm)
 

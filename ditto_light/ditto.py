@@ -13,24 +13,7 @@ from transformers import AutoModel, get_linear_schedule_with_warmup
 from torch.cuda.amp import GradScaler, autocast
 from tqdm.auto import tqdm
 
-# map lm name to huggingface's pre-trained model names
-lm_mp = {
-    "distilbert": "distilbert-base-uncased",
-    "bert": "bert-base-uncased",
-    "albert": "albert-base-v2",
-    "roberta": "roberta-base",
-    "distilbert": "distilbert-base-uncased",
-    "xlmr-base": "xlm-roberta-base",
-    "xlmr-large": "xlm-roberta-large",
-    "xlmr-xl": "facebook/xlm-roberta-xl",
-    "xlmr-xxl": "facebook/xlm-roberta-xxl",
-    "multilingual-bert-cased": "bert-base-multilingual-cased",
-    "stsb-xlm-r-multilingual": "sentence-transformers/stsb-xlm-r-multilingual",
-    "all-mpnet-base-v2": "sentence-transformers/all-mpnet-base-v2",
-    "all-distilroberta-v1": "sentence-transformers/all-distilroberta-v1",
-    "all-MiniLM-L6-v2": "sentence-transformers/all-MiniLM-L6-v2",
-    "all-MiniLM-L12-v2": "sentence-transformers/all-MiniLM-L12-v2",
-}
+from config.model_alias import model_alias
 
 
 class DittoModel(nn.Module):
@@ -38,13 +21,9 @@ class DittoModel(nn.Module):
 
     def __init__(self, device="cuda", lm="xlmr-base", alpha_aug=0.8):
         super().__init__()
-        if lm in lm_mp:
-            print(lm)
-            print(lm_mp[lm])
-            self.bert = AutoModel.from_pretrained(lm_mp[lm])
+        if lm in model_alias:
+            self.bert = AutoModel.from_pretrained(model_alias[lm])
         else:
-            print(lm)
-            print(lm_mp[lm])
             self.bert = AutoModel.from_pretrained(lm)
 
         self.device = device
