@@ -11,6 +11,7 @@ from torch.utils import data
 from torch.optim import AdamW
 from transformers import AutoModel, get_linear_schedule_with_warmup
 from torch.cuda.amp import GradScaler, autocast
+from tqdm.auto import tqdm
 
 # map lm name to huggingface's pre-trained model names
 lm_mp = {
@@ -120,7 +121,7 @@ def evaluate(model, iterator, threshold=None):
     }
 
 
-def train_step(train_iter, model, optimizer, scheduler, hp):
+def train_step(train_iter, model, optimizer, scheduler, hp, monitor_step=10):
     """Perform a single training step
 
     Args:
@@ -139,7 +140,8 @@ def train_step(train_iter, model, optimizer, scheduler, hp):
     # criterion = nn.MSELoss()
     mean_loss = 0
     num_iter = len(train_iter)
-    for i, batch in enumerate(train_iter):
+    pbar = tqdm(train_iter)
+    for i, batch in enumerate(pbar):
         optimizer.zero_grad()
 
         with autocast(enabled=hp.fp16):
@@ -157,8 +159,8 @@ def train_step(train_iter, model, optimizer, scheduler, hp):
         scaler.update()
         scheduler.step()
 
-        if i % 10 == 0:  # monitoring
-            print(f"step: {i}, loss: {loss.item()}")
+        if i % monitor_step == 0:
+            pbar.set_description(f"Train loss (running): {loss.item()}")
             wandb.log({"train/loss": loss.item()})
         mean_loss += loss.item() / num_iter
         del loss
