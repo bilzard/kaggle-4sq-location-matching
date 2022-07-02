@@ -43,6 +43,8 @@ class DittoModel(nn.Module):
             print(lm_mp[lm])
             self.bert = AutoModel.from_pretrained(lm_mp[lm])
         else:
+            print(lm)
+            print(lm_mp[lm])
             self.bert = AutoModel.from_pretrained(lm)
 
         self.device = device
