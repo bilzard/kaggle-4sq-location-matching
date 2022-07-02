@@ -55,13 +55,10 @@ if __name__ == "__main__":
     hp.task = make_task_name(hp.train_path)
 
     # create the tag of the run
-    run_tag = "%s_lm=%s_da=%s_dk=%s_su=%s_size=%s_id=%d" % (
+    run_tag = "%s_%s_ep%did%d" % (
         hp.task,
         hp.lm,
-        hp.da,
-        hp.dk,
-        hp.summarize,
-        str(hp.size),
+        hp.n_epochs,
         hp.run_id,
     )
     run_tag = run_tag.replace("/", "_")
