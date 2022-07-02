@@ -160,7 +160,7 @@ def train_step(train_iter, model, optimizer, scheduler, hp, monitor_step=10):
         scheduler.step()
 
         if i % monitor_step == 0:
-            pbar.set_description(f"Train loss (running): {loss.item()}")
+            pbar.set_description(f"Train loss (running): {loss.item():.4f}")
             wandb.log({"train/loss": loss.item()})
         mean_loss += loss.item() / num_iter
         del loss
