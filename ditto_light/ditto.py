@@ -251,7 +251,7 @@ def train(trainset, validset, testset, hp):
 
         # logging
         scalars = {
-            **{f"val/{k}": v for k, v in dev_result.items() if k != "threshold"},
+            **{f"val/{k}": v for k, v in dev_result.items()},
             **{f"test/{k}": v for k, v in test_result.items() if k != "threshold"},
             "train/loss_epoch": loss,
         }
