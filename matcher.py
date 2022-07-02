@@ -212,9 +212,8 @@ def tune_threshold(config, model, hp):
         collate_fn=DittoDataset.pad,
     )
 
-    # acc, prec, recall, f1, v_loss, th = eval_classifier(model, valid_iter,
-    #                                                     get_threshold=True)
-    f1, th, _, _ = evaluate(model, valid_iter, threshold=None)
+    result = evaluate(model, valid_iter, threshold=None)
+    f1, th = result["f1"], result["threshold"]
 
     # verify F1
     set_seed(123)

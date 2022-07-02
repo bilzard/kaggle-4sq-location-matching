@@ -90,29 +90,32 @@ def evaluate(model, iterator, threshold=None):
             all_probs += probs.cpu().numpy().tolist()
             all_y += y.cpu().numpy().tolist()
 
-    if threshold is not None:
-        pred = [1 if p > threshold else 0 for p in all_probs]
-        f1 = metrics.f1_score(all_y, pred)
-        recall = metrics.recall_score(all_y, pred)
-        precision = metrics.precision_score(all_y, pred)
+    iou = None
+    if threshold is None:
+        # search best threshold
+        threshold = 0.5
+        iou = 0.0
 
-        return f1, recall, precision
-    else:
-        best_th = 0.5
-        f1 = 0.0  # metrics.f1_score(all_y, all_p)
+        for thr in np.arange(0.0, 1.0, 0.05):
+            pred = [1 if p > thr else 0 for p in all_probs]
+            best_iou = metrics.jaccard_score(all_y, pred, average="binary")
+            if best_iou > iou:
+                iou = best_iou
+                threshold = thr
 
-        for th in np.arange(0.0, 1.0, 0.05):
-            pred = [1 if p > th else 0 for p in all_probs]
-            new_f1 = metrics.f1_score(all_y, pred)
-            if new_f1 > f1:
-                f1 = new_f1
-                best_th = th
-
-        pred = [1 if p > best_th else 0 for p in all_probs]
-        recall = metrics.recall_score(all_y, pred)
-        precision = metrics.precision_score(all_y, pred)
-
-        return f1, best_th, recall, precision
+    pred = [1 if p > threshold else 0 for p in all_probs]
+    precision, recall, f1, _ = metrics.precision_recall_fscore_support(
+        all_y, pred, average="binary"
+    )
+    if iou is None:
+        iou = metrics.jaccard_score(all_y, pred, average="binary")
+    return {
+        "f1": f1,
+        "recall": recall,
+        "precision": precision,
+        "iou": iou,
+        "threshold": threshold,
+    }
 
 
 def train_step(train_iter, model, optimizer, scheduler, hp):
@@ -209,9 +212,7 @@ def train(trainset, validset, testset, hp):
         optimizer, num_warmup_steps=hp.warmup_steps, num_training_steps=num_steps
     )
 
-    wandb.watch(model, log_freq=100)
-
-    best_dev_f1 = best_test_f1 = 0.0
+    best_dev_score = best_test_score = 0.0
     for epoch in range(1, hp.n_epochs + 1):
         # train
         model.train()
@@ -219,12 +220,12 @@ def train(trainset, validset, testset, hp):
 
         # eval
         model.eval()
-        dev_f1, th, dev_recall, dev_precision = evaluate(model, valid_iter)
-        test_f1, test_recall, test_precision = evaluate(model, test_iter, threshold=th)
+        dev_result = evaluate(model, valid_iter)
+        test_result = evaluate(model, test_iter, threshold=dev_result["threshold"])
 
-        if dev_f1 > best_dev_f1:
-            best_dev_f1 = dev_f1
-            best_test_f1 = test_f1
+        if dev_result["iou"] > best_dev_score:
+            best_dev_score = dev_result["iou"]
+            best_test_score = test_result["iou"]
             if hp.save_model:
                 # create the directory if not exist
                 directory = os.path.join(hp.logdir, hp.task)
@@ -243,16 +244,12 @@ def train(trainset, validset, testset, hp):
 
         # logging
         scalars = {
-            "val/f1": dev_f1,
-            "val/recall": dev_recall,
-            "val/precision": dev_precision,
-            "test/f1": test_f1,
-            "test/recall": test_recall,
-            "test/precision": test_precision,
+            **{f"val/{k}": v for k, v in dev_result.items() if k != "threshold"},
+            **{f"test/{k}": v for k, v in test_result.items() if k != "threshold"},
             "train/loss_epoch": loss,
         }
         print(
-            f"epoch {epoch}: test/best_f1: {best_test_f1:.3f}"
-            + " ".join([f"{k}={v:.3f}" for k, v in scalars.items()])
+            f"[epoch {epoch}] test/best_score: {best_test_score:.3f}, "
+            + ", ".join([f"{k}={v:.3f}" for k, v in scalars.items()])
         )
         wandb.log(dict(**scalars, epoch=epoch))
