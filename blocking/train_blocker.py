@@ -133,6 +133,7 @@ def train(hp):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--run_id", type=int, default=0)
     parser.add_argument(
         "--train_fn", type=str, default="../data/er_magellan/Structured/Beer/train.txt"
     )
@@ -151,7 +152,7 @@ if __name__ == "__main__":
     hp = parser.parse_args()
 
     # create the tag of the run
-    run_tag = "lm=%s" % (hp.lm)
+    run_tag = "lm=%s_id=%s" % (hp.lm, hp.run_id)
     run_tag = run_tag.replace("/", "_")
 
     with wandb.init(project="4sq-blocker", name=run_tag, config=vars(hp)):
