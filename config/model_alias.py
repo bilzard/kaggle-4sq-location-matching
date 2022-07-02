@@ -1,0 +1,17 @@
+model_alias = {
+    "distilbert": "distilbert-base-uncased",
+    "bert": "bert-base-uncased",
+    "albert": "albert-base-v2",
+    "roberta": "roberta-base",
+    "distilbert": "distilbert-base-uncased",
+    "xlmr-base": "xlm-roberta-base",
+    "xlmr-large": "xlm-roberta-large",
+    "xlmr-xl": "facebook/xlm-roberta-xl",
+    "xlmr-xxl": "facebook/xlm-roberta-xxl",
+    "multilingual-bert-cased": "bert-base-multilingual-cased",
+    "stsb-xlm-r-multilingual": "sentence-transformers/stsb-xlm-r-multilingual",
+    "all-mpnet-base-v2": "sentence-transformers/all-mpnet-base-v2",
+    "all-distilroberta-v1": "sentence-transformers/all-distilroberta-v1",
+    "all-MiniLM-L6-v2": "sentence-transformers/all-MiniLM-L6-v2",
+    "all-MiniLM-L12-v2": "sentence-transformers/all-MiniLM-L12-v2",
+}
