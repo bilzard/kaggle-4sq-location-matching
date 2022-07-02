@@ -21,7 +21,7 @@ def make_task_name(path):
 
 
 def make_run_tag(hp):
-    run_tag = f"{hp.task}_{hp.lm}_ep{hp.n_epochs}id{hp.run_id}"
+    run_tag = f"{hp.task}_{hp.lm}_ep{hp.n_epochs}_id{hp.run_id}"
     run_tag = run_tag.replace("/", "_")
     return run_tag
 
