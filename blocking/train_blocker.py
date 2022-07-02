@@ -133,7 +133,7 @@ def train(hp):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run_id", type=int, default=0)
+    parser.add_argument("run_id", type=str)
     parser.add_argument(
         "--train_fn", type=str, default="../data/er_magellan/Structured/Beer/train.txt"
     )
