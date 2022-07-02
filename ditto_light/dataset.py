@@ -1,3 +1,5 @@
+import gzip
+
 import torch
 
 from torch.utils import data
@@ -32,15 +34,22 @@ class DittoDataset(data.Dataset):
         self.max_len = max_len
         self.size = size
 
-        if isinstance(path, list):
-            lines = path
-        else:
-            lines = open(path)
+        def _handle_data(iterable):
+            pairs, labels = [], []
+            for line in iterable:
+                s1, s2, label = line.strip().split("\t")
+                pairs.append((s1, s2))
+                labels.append(int(label))
+            return pairs, labels
 
-        for line in lines:
-            s1, s2, label = line.strip().split("\t")
-            self.pairs.append((s1, s2))
-            self.labels.append(int(label))
+        if isinstance(path, list):
+            self.pairs, self.labels = _handle_data(path)
+        elif isinstance(path, str):
+            fopen_func = gzip.open if path.endswith(".gz") else open
+            with fopen_func(path, "rt") as fp:
+                self.pairs, self.labels = _handle_data(fp)
+        else:
+            raise RuntimeError("path's type should be list or string")
 
         self.pairs = self.pairs[:size]
         self.labels = self.labels[:size]
