@@ -152,7 +152,7 @@ if __name__ == "__main__":
     hp = parser.parse_args()
 
     # create the tag of the run
-    run_tag = "lm=%s_id=%s" % (hp.lm, hp.run_id)
+    run_tag = "%s_lm=%s" % (hp.run_id, hp.lm)
     run_tag = run_tag.replace("/", "_")
 
     with wandb.init(project="4sq-blocker", name=run_tag, config=vars(hp)):
