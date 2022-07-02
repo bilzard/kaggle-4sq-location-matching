@@ -219,7 +219,7 @@ def train(trainset, validset, testset, hp):
         optimizer, num_warmup_steps=warmup_steps, num_training_steps=num_steps
     )
 
-    best_dev_score = best_test_score = 0.0
+    best_dev_score = 0.0
     for epoch in range(1, hp.n_epochs + 1):
         # train
         model.train()
@@ -228,11 +228,9 @@ def train(trainset, validset, testset, hp):
         # eval
         model.eval()
         dev_result = evaluate(model, valid_iter)
-        test_result = evaluate(model, test_iter, threshold=dev_result["threshold"])
 
         if dev_result["iou"] > best_dev_score:
             best_dev_score = dev_result["iou"]
-            best_test_score = test_result["iou"]
             if hp.save_model:
                 # create the directory if not exist
                 if not os.path.exists(hp.logdir):
@@ -251,11 +249,10 @@ def train(trainset, validset, testset, hp):
         # logging
         scalars = {
             **{f"val/{k}": v for k, v in dev_result.items()},
-            **{f"test/{k}": v for k, v in test_result.items() if k != "threshold"},
             "train/loss_epoch": loss,
         }
         print(
-            f"[epoch {epoch}] test/best_score: {best_test_score:.3f}, "
+            f"[epoch {epoch}] "
             + ", ".join([f"{k}={v:.3f}" for k, v in scalars.items()])
         )
         wandb.log(dict(**scalars, epoch=epoch))
