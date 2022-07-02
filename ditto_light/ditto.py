@@ -112,6 +112,20 @@ def evaluate(model, iterator, threshold=None):
     }
 
 
+def log_model(ckpt_path, hp, epoch, score, best_model=True):
+    metadata = {
+        "score": score,
+        "epoch": epoch,
+        "total_epoch": hp.n_epochs,
+    }
+    artifact = wandb.Artifact(
+        name=f"run-{wandb.run.id}-model", type="model", metadata=metadata
+    )
+    artifact.add_file(ckpt_path)
+    aliases = ["latest", "best"] if best_model else ["latest"]
+    wandb.log_artifact(artifact, aliases=aliases)
+
+
 def train_step(train_iter, model, optimizer, scheduler, hp, monitor_step=10):
     """Perform a single training step
 
@@ -212,23 +226,26 @@ def train(trainset, validset, hp):
         model.eval()
         dev_result = evaluate(model, valid_iter)
 
-        if dev_result["iou"] > best_dev_score:
-            best_dev_score = dev_result["iou"]
-            if hp.save_model:
-                # create the directory if not exist
-                if not os.path.exists(hp.logdir):
-                    os.makedirs(hp.logdir)
+        if hp.save_model:
+            # create the directory if not exist
+            if not os.path.exists(hp.logdir):
+                os.makedirs(hp.logdir)
 
-                # save the checkpoints for each component
-                ckpt_path = os.path.join(hp.logdir, f"model_{hp.run_tag}.pt")
-                ckpt = {
-                    "model": model.state_dict(),
-                    "optimizer": optimizer.state_dict(),
-                    "scheduler": scheduler.state_dict(),
-                    "epoch": epoch,
-                }
-                torch.save(ckpt, ckpt_path)
-                wandb.save(ckpt_path)
+            # save the checkpoints for each component
+            ckpt_path = os.path.join(hp.logdir, f"model_{hp.run_tag}.pt")
+            ckpt = {
+                "model": model.state_dict(),
+                "optimizer": optimizer.state_dict(),
+                "scheduler": scheduler.state_dict(),
+                "epoch": epoch,
+            }
+            torch.save(ckpt, ckpt_path)
+
+            if dev_result["iou"] > best_dev_score:
+                best_dev_score = dev_result["iou"]
+                log_model(ckpt_path, hp, epoch, best_dev_score, best_model=True)
+            else:
+                log_model(ckpt_path, hp, epoch, best_dev_score, best_model=False)
 
         # logging
         scalars = {
