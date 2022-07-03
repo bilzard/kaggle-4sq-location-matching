@@ -112,12 +112,12 @@ def train(hp):
         len(train_dataloader) * hp.n_epochs / hp.batch_size * 0.1
     )  # 10% of train data for warm-up
 
-    model_path = f"blocker_model_{hp.run_tag}.pt"
-
-    if os.path.exists(model_path):
+    output_path = f"{hp.run_tag}"
+    checkpoint_path = f"blocker_model_{hp.run_tag}.pt"
+    if os.path.exists(output_path):
         import shutil
 
-        shutil.rmtree(model_path)
+        shutil.rmtree(output_path)
 
     def eval_callback(score, epoch, steps):
         print(f"epoch {epoch + 1} ({steps} steps): val/score={score}")
@@ -130,7 +130,8 @@ def train(hp):
         epochs=hp.n_epochs,
         evaluation_steps=hp.evaluation_steps,
         warmup_steps=warmup_steps,
-        output_path=model_path,
+        output_path=output_path,
+        checkpoint_path=checkpoint_path,
         use_amp=hp.fp16,
         callback=eval_callback,
     )
