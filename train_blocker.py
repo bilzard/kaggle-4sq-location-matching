@@ -119,7 +119,7 @@ def train(hp):
         shutil.rmtree(output_path)
 
     def eval_callback(score, epoch, steps):
-        print(f"epoch {epoch + 1} ({steps} steps): val/score={score}")
+        print(f"epoch {epoch + 1} ({steps} steps): val/score={score:.5f}")
         wandb.log({"epoch": epoch + 1, "steps": steps, "val/score": score})
 
     # Train the model
