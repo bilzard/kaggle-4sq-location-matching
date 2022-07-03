@@ -112,7 +112,7 @@ def train(hp):
         len(train_dataloader) * hp.n_epochs / hp.batch_size * 0.1
     )  # 10% of train data for warm-up
 
-    model_path = f"model_{hp.run_tag}.pt"
+    model_path = f"blocker_model_{hp.run_tag}.pt"
 
     if os.path.exists(model_path):
         import shutil
