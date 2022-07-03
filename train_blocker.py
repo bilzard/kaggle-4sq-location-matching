@@ -10,6 +10,7 @@ from sentence_transformers import SentenceTransformer, SentencesDataset
 from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
 
 from torch.utils.data import DataLoader
+from config.model_alias import model_alias
 
 
 class Reader:
@@ -64,20 +65,9 @@ def train(hp):
     Returns:
         None
     """
-    # define model
-    model_names = {
-        "distilbert": "distilbert-base-uncased",
-        "bert": "bert-base-uncased",
-        "albert": "albert-base-v2",
-        "stsb-xlm-r-multilingual": "sentence-transformers/stsb-xlm-r-multilingual",
-        "all-mpnet-base-v2": "sentence-transformers/all-mpnet-base-v2",
-        "all-distilroberta-v1": "sentence-transformers/all-distilroberta-v1",
-        "all-MiniLM-L6-v2": "sentence-transformers/all-MiniLM-L6-v2",
-        "all-MiniLM-L12-v2": "sentence-transformers/all-MiniLM-L12-v2",
-    }
 
     word_embedding_model = models.Transformer(
-        model_names[hp.lm], max_seq_length=hp.max_seq_length
+        model_alias[hp.lm], max_seq_length=hp.max_seq_length
     )
     pooling_model = models.Pooling(
         word_embedding_model.get_word_embedding_dimension(),
