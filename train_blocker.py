@@ -112,7 +112,7 @@ def train(hp):
         len(train_dataloader) * hp.n_epochs / hp.batch_size * 0.1
     )  # 10% of train data for warm-up
 
-    output_path = f"{hp.run_tag}"
+    output_path = os.path.join(hp.output_path, hp.run_tag)
     if os.path.exists(output_path):
         import shutil
 
@@ -141,12 +141,12 @@ if __name__ == "__main__":
     parser.add_argument("val_path", type=str)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--n_epochs", type=int, default=20)
-    parser.add_argument("--logdir", type=str, default="checkpoints/")
     parser.add_argument("--lm", type=str, default="distilbert")
     parser.add_argument("--fp16", dest="fp16", action="store_true")
     parser.add_argument("--max_seq_length", type=int, default=None)
     parser.add_argument("--evaluation_steps", type=int, default=0)
     parser.add_argument("--run_id", type=int, default=0)
+    parser.add_argument("--output_path", type=str, default="output")
 
     hp = parser.parse_args()
 
