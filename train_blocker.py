@@ -70,7 +70,7 @@ def make_run_tag(hp):
 
 def train(hp):
     """Train the advanced blocking model
-    Store the trained model in hp.model_fn.
+    Store the trained model.
 
     Args:
         hp (Namespace): the hyperparameters
@@ -112,10 +112,12 @@ def train(hp):
         len(train_dataloader) * hp.n_epochs / hp.batch_size * 0.1
     )  # 10% of train data for warm-up
 
-    if os.path.exists(hp.model_fn):
+    model_path = f"model_{hp.run_tag}.pt"
+
+    if os.path.exists(model_path):
         import shutil
 
-        shutil.rmtree(hp.model_fn)
+        shutil.rmtree(model_path)
 
     def eval_callback(score, epoch, steps):
         print(f"epoch {epoch} ({steps} steps): val/score={score}")
@@ -128,7 +130,7 @@ def train(hp):
         epochs=hp.n_epochs,
         evaluation_steps=hp.evaluation_steps,
         warmup_steps=warmup_steps,
-        output_path=hp.model_fn,
+        output_path=hp.model_path,
         use_amp=hp.fp16,
         callback=eval_callback,
     )
@@ -138,7 +140,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("train_path", type=str)
     parser.add_argument("val_path", type=str)
-    parser.add_argument("--model_fn", type=str, default="model.pth")
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--n_epochs", type=int, default=20)
     parser.add_argument("--logdir", type=str, default="checkpoints/")
