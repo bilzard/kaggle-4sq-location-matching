@@ -4,7 +4,6 @@ import argparse
 import math
 import wandb
 
-from pytorch_lightning import seed_everything
 from sentence_transformers.readers import InputExample
 from sentence_transformers import models, losses
 from sentence_transformers import SentenceTransformer, SentencesDataset
@@ -12,6 +11,7 @@ from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
 
 from torch.utils.data import DataLoader
 from config.model_alias import model_alias
+from train_util.seed import seed_everything
 
 
 class Reader:

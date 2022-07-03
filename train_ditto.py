@@ -2,12 +2,11 @@ import argparse
 import sys
 import wandb
 
-from pytorch_lightning import seed_everything
-
 sys.path.insert(0, "Snippext_public")
 
 from ditto_light.dataset import DittoDataset
 from ditto_light.ditto import train
+from train_util.seed import seed_everything
 
 
 def make_task_name(path):
