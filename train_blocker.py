@@ -55,6 +55,19 @@ class EvalReader(Reader):
         return sentences1, sentences2, scores
 
 
+def make_task_name(path):
+    """
+    "/data/hoge/hoge_hoge.tsv.gz" -> hoge_hoge
+    """
+    return path.split("/")[-1].split(".")[0]
+
+
+def make_run_tag(hp):
+    run_tag = f"{hp.task}_{hp.lm}_ep{hp.n_epochs}_id{hp.run_id}"
+    run_tag = run_tag.replace("/", "_")
+    return run_tag
+
+
 def train(hp):
     """Train the advanced blocking model
     Store the trained model in hp.model_fn.
@@ -80,7 +93,7 @@ def train(hp):
 
     # load the training and validation data
     reader = TrainReader()
-    train_examples = reader.get_examples(hp.train_fn)
+    train_examples = reader.get_examples(hp.train_path)
     train_dataset = SentencesDataset(train_examples, model)
     train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=hp.batch_size)
     train_loss = losses.SoftmaxLoss(
@@ -90,7 +103,7 @@ def train(hp):
     )
 
     dev_reader = EvalReader()
-    sentences1, sentences2, scores = dev_reader.get_examples(hp.valid_fn)
+    sentences1, sentences2, scores = dev_reader.get_examples(hp.val_path)
     evaluator = EmbeddingSimilarityEvaluator(
         sentences1, sentences2, scores, batch_size=hp.batch_size, show_progress_bar=True
     )
@@ -124,12 +137,8 @@ def train(hp):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("run_id", type=str)
-    parser.add_argument(
-        "--train_fn", type=str, default="../data/er_magellan/Structured/Beer/train.txt"
-    )
-    parser.add_argument(
-        "--valid_fn", type=str, default="../data/er_magellan/Structured/Beer/valid.txt"
-    )
+    parser.add_argument("train_path", type=str)
+    parser.add_argument("val_path", type=str)
     parser.add_argument("--model_fn", type=str, default="model.pth")
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--n_epochs", type=int, default=20)
@@ -141,9 +150,8 @@ if __name__ == "__main__":
 
     hp = parser.parse_args()
 
-    # create the tag of the run
-    run_tag = "%s_lm=%s" % (hp.run_id, hp.lm)
-    run_tag = run_tag.replace("/", "_")
+    hp.task = make_task_name(hp.train_path)
+    hp.run_tag = make_run_tag(hp)
 
-    with wandb.init(project="4sq-blocker", name=run_tag, config=vars(hp)):
+    with wandb.init(project="4sq-blocker", name=hp.run_tag, config=vars(hp)):
         train(hp)
