@@ -130,7 +130,7 @@ def train(hp):
         epochs=hp.n_epochs,
         evaluation_steps=hp.evaluation_steps,
         warmup_steps=warmup_steps,
-        output_path=hp.model_path,
+        output_path=model_path,
         use_amp=hp.fp16,
         callback=eval_callback,
     )
