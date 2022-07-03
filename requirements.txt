@@ -2,4 +2,7 @@ wandb==0.12.18
 transformers==4.19.3
 sentencepiece==0.1.96
 sacremoses==0.0.53
-sentence-transformers==2.2.0
+sentence-transformers==2.2.2
+faiss-gpu==1.7.2
+optuna==2.10.1
+h3==3.7.4
