@@ -113,7 +113,6 @@ def train(hp):
     )  # 10% of train data for warm-up
 
     output_path = f"{hp.run_tag}"
-    checkpoint_path = f"blocker_model_{hp.run_tag}.pt"
     if os.path.exists(output_path):
         import shutil
 
@@ -131,7 +130,6 @@ def train(hp):
         evaluation_steps=hp.evaluation_steps,
         warmup_steps=warmup_steps,
         output_path=output_path,
-        checkpoint_path=checkpoint_path,
         use_amp=hp.fp16,
         callback=eval_callback,
     )
