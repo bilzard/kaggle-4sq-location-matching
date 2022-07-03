@@ -4,6 +4,7 @@ import argparse
 import math
 import wandb
 
+from pytorch_lightning import seed_everything
 from sentence_transformers.readers import InputExample
 from sentence_transformers import models, losses
 from sentence_transformers import SentenceTransformer, SentencesDataset
@@ -152,6 +153,7 @@ if __name__ == "__main__":
 
     hp.task = make_task_name(hp.train_path)
     hp.run_tag = make_run_tag(hp)
+    seed_everything(hp.run_id)
 
     with wandb.init(project="4sq-blocker", name=hp.run_tag, config=vars(hp)):
         train(hp)

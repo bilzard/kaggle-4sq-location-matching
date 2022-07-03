@@ -1,11 +1,8 @@
 import argparse
-import json
 import sys
-import random
-
-import torch
-import numpy as np
 import wandb
+
+from pytorch_lightning import seed_everything
 
 sys.path.insert(0, "Snippext_public")
 
@@ -49,12 +46,7 @@ if __name__ == "__main__":
     hp = parser.parse_args()
 
     # set seeds
-    seed = hp.run_id
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
+    seed_everything(hp.run_id)
 
     # only a single task for baseline
     hp.task = make_task_name(hp.train_path)

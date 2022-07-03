@@ -3,3 +3,4 @@ transformers==4.19.3
 sentencepiece==0.1.96
 sacremoses==0.0.53
 sentence-transformers==2.2.0
+pytorch-lightning==1.5.8
