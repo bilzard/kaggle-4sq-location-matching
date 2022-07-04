@@ -16,7 +16,12 @@ from sklearn.metrics import jaccard_score
 from ditto_light.ditto import evaluate, DittoModel
 from ditto_light.exceptions import ModelNotFoundError
 from ditto_light.dataset import DittoDataset
-from ditto_light.train_util import seed_everything, set_open_func, count_lines
+from ditto_light.train_util import (
+    seed_everything,
+    set_open_func,
+    count_lines,
+    as_chunks,
+)
 
 
 def make_task_name(path):
@@ -101,7 +106,6 @@ def predict(
     Returns:
         None
     """
-    sentences = []
 
     def process_chunk(sentences, writer, pbar):
         predictions, logits = classify(
@@ -127,17 +131,9 @@ def predict(
     with set_open_func(input_path)(input_path, "rt") as reader, jsonlines.open(
         output_path, mode="w"
     ) as writer:
-        sentences = []
         pbar = tqdm(total=total_inputs)
-        for line in reader:
-            item = line.strip().split("\t")
-            sentences.append("\t".join(item))  # "(sentence1)\t(sentence2)\t0"
-            if len(sentences) == chunk_size:
-                process_chunk(sentences, writer, pbar)
-                sentences.clear()
-
-        if len(sentences) > 0:
-            process_chunk(sentences, writer, pbar)
+        for chunks in as_chunks(reader, chunk_size):
+            process_chunk(chunks, writer, pbar)
 
     run_time = time.time() - start_time
     os.system("echo %s %f >> log.txt" % (run_tag, run_time))
