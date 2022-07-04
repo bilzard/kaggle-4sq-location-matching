@@ -10,7 +10,6 @@ import wandb
 
 from torch.utils import data
 from tqdm.auto import tqdm
-from scipy.special import softmax
 from sklearn.metrics import jaccard_score
 
 from ditto_light.ditto import evaluate, DittoModel
