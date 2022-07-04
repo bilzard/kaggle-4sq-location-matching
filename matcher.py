@@ -1,17 +1,14 @@
 import argparse
-import json
 import os
-import random
 import time
 
 import torch
-import numpy as np
 import jsonlines
-import sklearn
 
 from torch.utils import data
 from tqdm import tqdm
 from scipy.special import softmax
+from sklearn.metrics import jaccard_score
 
 from ditto_light.ditto import evaluate, DittoModel
 from ditto_light.exceptions import ModelNotFoundError
@@ -20,43 +17,29 @@ from ditto_light.dataset import DittoDataset
 from train_util.seed import seed_everything
 
 
-def to_str(ent1, ent2, summarizer=None, max_len=256, dk_injector=None):
-    """Serialize a pair of data entries
-
-    Args:
-        ent1 (Dictionary): the 1st data entry
-        ent2 (Dictionary): the 2nd data entry
-        summarizer (Summarizer, optional): the summarization module
-        max_len (int, optional): the max sequence length
-        dk_injector (DKInjector, optional): the domain-knowledge injector
-
-    Returns:
-        string: the serialized version
+def make_task_name(path):
     """
-    content = ""
-    for ent in [ent1, ent2]:
-        if isinstance(ent, str):
-            content += ent
-        else:
-            for attr in ent.keys():
-                content += "COL %s VAL %s " % (attr, ent[attr])
-        content += "\t"
-
-    content += "0"
-
-    new_ent1, new_ent2, _ = content.split("\t")
-    if dk_injector is not None:
-        new_ent1 = dk_injector.transform(new_ent1)
-        new_ent2 = dk_injector.transform(new_ent2)
-
-    return new_ent1 + "\t" + new_ent2 + "\t0"
+    "/data/hoge/hoge_hoge.tsv.gz" -> hoge_hoge
+    """
+    return path.split("/")[-1].split(".")[0]
 
 
-def classify(sentence_pairs, model, lm="distilbert", max_len=256, threshold=None):
+def make_run_tag(hp):
+    run_tag = f"{hp.task}_{hp.lm}_id{hp.seed}"
+    run_tag = run_tag.replace("/", "_")
+    return run_tag
+
+
+def to_str(ent1, ent2):
+    """Serialize a pair of data entries"""
+    return ent1 + "\t" + ent2 + "\t0"
+
+
+def classify(sentences, model, lm="distilbert", max_len=256, threshold=None):
     """Apply the MRPC model.
 
     Args:
-        sentence_pairs (list of str): the sequence pairs
+        sentences (list of str): the sequence pairs
         model (MultiTaskNet): the model in pytorch
         max_len (int, optional): the max sequence length
         threshold (float, optional): the threshold of the 0's class
@@ -64,10 +47,7 @@ def classify(sentence_pairs, model, lm="distilbert", max_len=256, threshold=None
     Returns:
         list of float: the scores of the pairs
     """
-    inputs = sentence_pairs
-    # print('max_len =', max_len)
-    dataset = DittoDataset(inputs, max_len=max_len, lm=lm)
-    # print(dataset[0])
+    dataset = DittoDataset(sentences, max_len=max_len, lm=lm)
     iterator = data.DataLoader(
         dataset=dataset,
         batch_size=len(dataset),
@@ -80,7 +60,6 @@ def classify(sentence_pairs, model, lm="distilbert", max_len=256, threshold=None
     all_probs = []
     all_logits = []
     with torch.no_grad():
-        # print('Classification')
         for i, batch in enumerate(iterator):
             x, _ = batch
             logits = model(x)
@@ -98,13 +77,11 @@ def classify(sentence_pairs, model, lm="distilbert", max_len=256, threshold=None
 def predict(
     input_path,
     output_path,
-    config,
     model,
+    run_tag,
     batch_size=1024,
-    summarizer=None,
     lm="distilbert",
     max_len=256,
-    dk_injector=None,
     threshold=None,
 ):
     """Run the model over the input file containing the candidate entry pairs
@@ -123,24 +100,15 @@ def predict(
     Returns:
         None
     """
-    pairs = []
+    sentences = []
 
-    def process_batch(rows, pairs, writer):
+    def process_batch(centences, writer):
         predictions, logits = classify(
-            pairs, model, lm=lm, max_len=max_len, threshold=threshold
+            centences, model, lm=lm, max_len=max_len, threshold=threshold
         )
-        # try:
-        #     predictions, logits = classify(pairs, model, lm=lm,
-        #                                    max_len=max_len,
-        #                                    threshold=threshold)
-        # except:
-        #     # ignore the whole batch
-        #     return
         scores = softmax(logits, axis=1)
-        for row, pred, score in zip(rows, predictions, scores):
+        for pred, score in zip(predictions, scores):
             output = {
-                "left": row[0],
-                "right": row[1],
                 "match": pred,
                 "match_confidence": score[int(pred)],
             }
@@ -148,7 +116,11 @@ def predict(
 
     # input_path can also be train/valid/test.txt
     # convert to jsonlines
-    if ".txt" in input_path:
+    if (
+        input_path.endswith(".txt")
+        or input_path.endswith(".tsv")
+        or input_path.endswith(".tsv.gz")
+    ):
         with jsonlines.open(input_path + ".jsonl", mode="w") as writer:
             for line in open(input_path):
                 writer.write(line.split("\t")[:2])
@@ -159,40 +131,28 @@ def predict(
     with jsonlines.open(input_path) as reader, jsonlines.open(
         output_path, mode="w"
     ) as writer:
-        pairs = []
-        rows = []
+        sentences = []
         for idx, row in tqdm(enumerate(reader)):
-            pairs.append(to_str(row[0], row[1], summarizer, max_len, dk_injector))
-            rows.append(row)
-            if len(pairs) == batch_size:
-                process_batch(rows, pairs, writer)
-                pairs.clear()
-                rows.clear()
+            sentences.append(to_str(row[0], row[1]))
+            if len(sentences) == batch_size:
+                process_batch(sentences, writer)
+                sentences.clear()
 
-        if len(pairs) > 0:
-            process_batch(rows, pairs, writer)
+        if len(sentences) > 0:
+            process_batch(sentences, writer)
 
     run_time = time.time() - start_time
-    run_tag = "%s_lm=%s_dk=%s_su=%s" % (
-        config["name"],
-        lm,
-        str(dk_injector != None),
-        str(summarizer != None),
-    )
     os.system("echo %s %f >> log.txt" % (run_tag, run_time))
 
 
-def tune_threshold(config, model, hp):
+def tune_threshold(model, hp):
     """Tune the prediction threshold for a given model on a validation set"""
-    validset = config["validset"]
-    task = hp.task
 
     # summarize the sequences up to the max sequence length
     seed_everything(hp.seed)
-    summarizer = injector = None
 
     # load dev sets
-    valid_dataset = DittoDataset(validset, max_len=hp.max_len, lm=hp.lm)
+    valid_dataset = DittoDataset(hp.val_path, max_len=hp.max_len, lm=hp.lm)
 
     # print(valid_dataset[0])
 
@@ -205,20 +165,17 @@ def tune_threshold(config, model, hp):
     )
 
     result = evaluate(model, valid_iter, threshold=None)
-    f1, th = result["f1"], result["threshold"]
+    threshold = result["threshold"]
 
-    # verify F1
     seed_everything(hp.seed)
     predict(
-        validset,
+        hp.val_path,
         "tmp.jsonl",
-        config,
         model,
-        summarizer=summarizer,
+        hp.run_tag,
         max_len=hp.max_len,
         lm=hp.lm,
-        dk_injector=injector,
-        threshold=th,
+        threshold=threshold,
     )
 
     predicts = []
@@ -228,18 +185,19 @@ def tune_threshold(config, model, hp):
     os.system("rm tmp.jsonl")
 
     labels = []
-    with open(validset) as fin:
-        for line in fin:
+    with open(hp.val_path) as fp:
+        for line in fp:
             labels.append(int(line.split("\t")[-1]))
 
-    real_f1 = sklearn.metrics.f1_score(labels, predicts)
-    print("load_f1 =", f1)
-    print("real_f1 =", real_f1)
+    # Q: What is the difference between score & real_score?
+    real_score = jaccard_score(labels, predicts)
+    output = {**result, "real_score": real_score}
+    print(", ".join(f"val/{key}={val:.5f}" for key, val in output.items()))
 
-    return th
+    return threshold
 
 
-def load_model(task, path, lm, use_gpu, fp16=True):
+def load_model(checkpoint_path, lm, use_gpu):
     """Load a model for a specific task.
 
     Args:
@@ -254,14 +212,8 @@ def load_model(task, path, lm, use_gpu, fp16=True):
         MultiTaskNet: the model
     """
     # load models
-    checkpoint = os.path.join(path, task, "model.pt")
-    if not os.path.exists(checkpoint):
-        raise ModelNotFoundError(checkpoint)
-
-    configs = json.load(open("configs.json"))
-    configs = {conf["name"]: conf for conf in configs}
-    config = configs[task]
-    config_list = [config]
+    if not os.path.exists(checkpoint_path):
+        raise ModelNotFoundError(checkpoint_path)
 
     if use_gpu:
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -270,48 +222,43 @@ def load_model(task, path, lm, use_gpu, fp16=True):
 
     model = DittoModel(device=device, lm=lm)
 
-    saved_state = torch.load(checkpoint, map_location=lambda storage, loc: storage)
+    saved_state = torch.load(checkpoint_path, map_location="cpu")
     model.load_state_dict(saved_state["model"])
     model = model.to(device)
 
-    return config, model
+    return model
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="Structured/Beer")
-    parser.add_argument(
-        "--input_path", type=str, default="input/candidates_small.jsonl"
-    )
-    parser.add_argument("--output_path", type=str, default="output/matched_small.jsonl")
+    parser.add_argument("input_path", type=str)
+    parser.add_argument("val_path", type=str)
+    parser.add_argument("checkpoint_path", type=str)
+    parser.add_argument("--output_path", type=str, default="output/result.jsonl")
     parser.add_argument("--lm", type=str, default="distilbert")
     parser.add_argument("--use_gpu", dest="use_gpu", action="store_true")
     parser.add_argument("--fp16", dest="fp16", action="store_true")
-    parser.add_argument("--checkpoint_path", type=str, default="checkpoints/")
-    parser.add_argument("--dk", type=str, default=None)
-    parser.add_argument("--summarize", dest="summarize", action="store_true")
     parser.add_argument("--max_len", type=int, default=256)
     parser.add_argument("--seed", type=int, default=123)
     hp = parser.parse_args()
 
     # load the models
     seed_everything(hp.seed)
-    config, model = load_model(hp.task, hp.checkpoint_path, hp.lm, hp.use_gpu, hp.fp16)
+    model = load_model(hp.checkpoint_path, hp.lm, hp.use_gpu)
 
-    summarizer = dk_injector = None
+    hp.task = make_task_name(hp.train_path)
+    hp.run_tag = make_run_tag(hp)
 
     # tune threshold
-    threshold = tune_threshold(config, model, hp)
+    threshold = tune_threshold(model, hp)
 
     # run prediction
     predict(
         hp.input_path,
         hp.output_path,
-        config,
         model,
-        summarizer=summarizer,
+        hp.run_tag,
         max_len=hp.max_len,
         lm=hp.lm,
-        dk_injector=dk_injector,
         threshold=threshold,
     )
