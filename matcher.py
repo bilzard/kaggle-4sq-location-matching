@@ -211,6 +211,30 @@ def load_model(checkpoint_path, lm, use_gpu):
     return model
 
 
+def match(hp):
+    model = load_model(hp.checkpoint_path, hp.lm, hp.use_gpu)
+
+    # load the models
+    seed_everything(hp.seed)
+
+    # tune threshold
+    if hp.val_path is not None:
+        threshold = tune_threshold(model, hp)
+    else:
+        threshold = hp.threshold
+
+    # run prediction
+    predict(
+        hp.input_path,
+        hp.output_path,
+        model,
+        hp.run_tag,
+        max_len=hp.max_len,
+        lm=hp.lm,
+        threshold=threshold,
+    )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", type=str)
@@ -224,29 +248,14 @@ if __name__ == "__main__":
     parser.add_argument("--max_len", type=int, default=256)
     parser.add_argument("--seed", type=int, default=123)
     parser.add_argument("--batch_size", type=int, default=256)
+    parser.add_argument("--monitor", dest="monitor", action="store_true")
     hp = parser.parse_args()
-
-    # load the models
-    seed_everything(hp.seed)
-    model = load_model(hp.checkpoint_path, hp.lm, hp.use_gpu)
 
     hp.task = make_task_name(hp.input_path)
     hp.run_tag = make_run_tag(hp)
 
-    with wandb.init(project="4sq-matcher", name=hp.run_tag, config=vars(hp)):
-        # tune threshold
-        if hp.val_path is not None:
-            threshold = tune_threshold(model, hp)
-        else:
-            threshold = hp.threshold
-
-        # run prediction
-        predict(
-            hp.input_path,
-            hp.output_path,
-            model,
-            hp.run_tag,
-            max_len=hp.max_len,
-            lm=hp.lm,
-            threshold=threshold,
-        )
+    if hp.monitor:
+        with wandb.init(project="4sq-matcher", name=hp.run_tag, config=vars(hp)):
+            match(hp)
+    else:
+        match(hp)
