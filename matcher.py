@@ -259,7 +259,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_len", type=int, default=256)
     parser.add_argument("--seed", type=int, default=123)
     parser.add_argument("--batch_size", type=int, default=1024)
-    parser.add_argument("--chunk_size", type=int, default=1024 * 128)
+    parser.add_argument("--chunk_size", type=int, default=1024 * 512)
     parser.add_argument("--monitor", dest="monitor", action="store_true")
     parser.add_argument("--num_workers", type=int, default=None)
     hp = parser.parse_args()
