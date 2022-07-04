@@ -14,3 +14,11 @@ def seed_everything(seed):
 def set_open_func(path):
     openfunc = gzip.open if path.endswith(".gz") else open
     return openfunc
+
+
+def count_lines(path):
+    with set_open_func(path)(path, "rt") as fp:
+        for i, _ in enumerate(fp):
+            pass
+
+    return i
