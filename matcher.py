@@ -2,6 +2,8 @@ import argparse
 import os
 import time
 
+from multiprocessing import cpu_count
+
 import jsonlines
 import torch
 import wandb
@@ -47,7 +49,7 @@ def classify(sentences, model, lm="distilbert", max_len=256, threshold=None):
         dataset=dataset,
         batch_size=len(dataset),
         shuffle=False,
-        num_workers=0,
+        num_workers=hp.num_workers,
         collate_fn=DittoDataset.pad,
     )
 
@@ -142,7 +144,7 @@ def tune_threshold(model, hp):
         dataset=valid_dataset,
         batch_size=hp.batch_size,
         shuffle=False,
-        num_workers=0,
+        num_workers=hp.num_workers,
         collate_fn=DittoDataset.pad,
     )
 
@@ -249,10 +251,13 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=123)
     parser.add_argument("--batch_size", type=int, default=1024)
     parser.add_argument("--monitor", dest="monitor", action="store_true")
+    parser.add_argument("--num_workers", type=int, default=None)
     hp = parser.parse_args()
 
     hp.task = make_task_name(hp.input_path)
     hp.run_tag = make_run_tag(hp)
+    if hp.num_workers is None:
+        hp.num_workers = cpu_count()
 
     if hp.monitor:
         with wandb.init(project="4sq-matcher", name=hp.run_tag, config=vars(hp)):
