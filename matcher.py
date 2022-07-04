@@ -184,7 +184,7 @@ def tune_threshold(model, hp):
     # Check if actual score
     pred_score = jaccard_score(labels, predicts)
     print(", ".join(f"val/{key}={val:.5f}" for key, val in result.items()))
-    print(f"eval score: {result['iou']}, pred scpre: {pred_score:.5f}")
+    print(f"eval score: {result['iou']:.5f}, pred scpre: {pred_score:.5f}")
 
     return threshold
 
