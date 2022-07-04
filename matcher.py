@@ -37,9 +37,7 @@ def make_run_tag(hp):
     return run_tag
 
 
-def classify(
-    sentences, model, pbar, batch_size=256, lm="distilbert", max_len=256, threshold=None
-):
+def classify(sentences, model, pbar, batch_size=256, lm="distilbert", max_len=256):
     """Apply the MRPC model.
 
     Args:
@@ -62,21 +60,15 @@ def classify(
 
     # prediction
     all_probs = []
-    all_logits = []
     with torch.no_grad():
         for batch in iterator:
             x, _ = batch
             logits = model(x)
             probs = logits.softmax(dim=1)[:, 1]
             all_probs += probs.cpu().numpy().tolist()
-            all_logits += logits.cpu().numpy().tolist()
             pbar.update(x.shape[0])
 
-    if threshold is None:
-        threshold = 0.5
-
-    pred = [1 if p > threshold else 0 for p in all_probs]
-    return pred, all_logits
+    return all_probs
 
 
 def predict(
@@ -87,7 +79,6 @@ def predict(
     chunk_size=1024 * 128,
     lm="distilbert",
     max_len=256,
-    threshold=None,
     batch_size=256,
 ):
     """Run the model over the input file containing the candidate entry pairs
@@ -106,26 +97,6 @@ def predict(
     Returns:
         None
     """
-
-    def process_chunk(sentences, writer, pbar):
-        predictions, logits = classify(
-            sentences,
-            model,
-            pbar,
-            batch_size=batch_size,
-            lm=lm,
-            max_len=max_len,
-            threshold=threshold,
-        )
-        scores = softmax(logits, axis=1)
-        for pred, score in zip(predictions, scores):
-            output = {
-                "match": pred,
-                "match_confidence": score[int(pred)],
-            }
-            writer.write(output)
-
-    # processing with chunks
     start_time = time.time()
     total_inputs = count_lines(input_path)
     with set_open_func(input_path)(input_path, "rt") as reader, jsonlines.open(
@@ -133,7 +104,15 @@ def predict(
     ) as writer:
         pbar = tqdm(total=total_inputs)
         for chunks in as_chunks(reader, chunk_size):
-            process_chunk(chunks, writer, pbar)
+            probs = classify(
+                chunks,
+                model,
+                pbar,
+                batch_size=batch_size,
+                lm=lm,
+                max_len=max_len,
+            )
+            writer.write_all(probs)
 
     run_time = time.time() - start_time
     os.system("echo %s %f >> log.txt" % (run_tag, run_time))
@@ -166,14 +145,13 @@ def tune_threshold(model, hp):
         hp.run_tag,
         max_len=hp.max_len,
         lm=hp.lm,
-        threshold=threshold,
         batch_size=hp.batch_size,
     )
 
     predicts = []
     with jsonlines.open("tmp.jsonl", mode="r") as reader:
         for line in reader:
-            predicts.append(int(line["match"]))
+            predicts.append(int(float(line) > threshold))
     os.system("rm tmp.jsonl")
 
     labels = []
@@ -229,9 +207,7 @@ def match(hp):
 
     # tune threshold
     if hp.val_path is not None:
-        threshold = tune_threshold(model, hp)
-    else:
-        threshold = hp.threshold
+        tune_threshold(model, hp)
 
     # run prediction
     predict(
@@ -241,7 +217,6 @@ def match(hp):
         hp.run_tag,
         max_len=hp.max_len,
         lm=hp.lm,
-        threshold=threshold,
         batch_size=hp.batch_size,
     )
 
