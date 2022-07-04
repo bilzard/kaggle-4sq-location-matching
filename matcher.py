@@ -65,7 +65,7 @@ def classify(
             probs = logits.softmax(dim=1)[:, 1]
             all_probs += probs.cpu().numpy().tolist()
             all_logits += logits.cpu().numpy().tolist()
-            pbar.update(x.size[0])
+            pbar.update(x.shape[0])
 
     if threshold is None:
         threshold = 0.5
