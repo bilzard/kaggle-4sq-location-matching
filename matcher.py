@@ -1,4 +1,5 @@
 import argparse
+import gzlib
 import os
 import time
 
@@ -28,11 +29,6 @@ def make_run_tag(hp):
     run_tag = f"{hp.task}_{hp.lm}_id{hp.seed}"
     run_tag = run_tag.replace("/", "_")
     return run_tag
-
-
-def to_str(ent1, ent2):
-    """Serialize a pair of data entries"""
-    return ent1 + "\t" + ent2 + "\t0"
 
 
 def classify(sentences, model, lm="distilbert", max_len=256, threshold=None):
@@ -114,26 +110,16 @@ def predict(
             }
             writer.write(output)
 
-    # input_path can also be train/valid/test.txt
-    # convert to jsonlines
-    if (
-        input_path.endswith(".txt")
-        or input_path.endswith(".tsv")
-        or input_path.endswith(".tsv.gz")
-    ):
-        with jsonlines.open(input_path + ".jsonl", mode="w") as writer:
-            for line in open(input_path):
-                writer.write(line.split("\t")[:2])
-        input_path += ".jsonl"
-
     # batch processing
     start_time = time.time()
-    with jsonlines.open(input_path) as reader, jsonlines.open(
+    openfunc = gzlib.open if input_path.endswith(".tsv.gz") else open
+    with openfunc(input_path, "rt") as reader, jsonlines.open(
         output_path, mode="w"
     ) as writer:
         sentences = []
-        for idx, row in tqdm(enumerate(reader)):
-            sentences.append(to_str(row[0], row[1]))
+        for idx, line in tqdm(enumerate(reader)):
+            item = line.strip().split("\t")
+            sentences.append("\t".join(*item[:2]))  # "(sentence1)\t(sentence2)"
             if len(sentences) == batch_size:
                 process_batch(sentences, writer)
                 sentences.clear()
@@ -153,9 +139,6 @@ def tune_threshold(model, hp):
 
     # load dev sets
     valid_dataset = DittoDataset(hp.val_path, max_len=hp.max_len, lm=hp.lm)
-
-    # print(valid_dataset[0])
-
     valid_iter = data.DataLoader(
         dataset=valid_dataset,
         batch_size=64,
