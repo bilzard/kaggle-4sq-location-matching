@@ -97,9 +97,9 @@ def predict(
     """
     sentences = []
 
-    def process_batch(centences, writer):
+    def process_batch(sentences, writer):
         predictions, logits = classify(
-            centences, model, lm=lm, max_len=max_len, threshold=threshold
+            sentences, model, lm=lm, max_len=max_len, threshold=threshold
         )
         scores = softmax(logits, axis=1)
         for pred, score in zip(predictions, scores):
