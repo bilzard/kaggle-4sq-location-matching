@@ -229,7 +229,7 @@ if __name__ == "__main__":
     seed_everything(hp.seed)
     model = load_model(hp.checkpoint_path, hp.lm, hp.use_gpu)
 
-    hp.task = make_task_name(hp.train_path)
+    hp.task = make_task_name(hp.input_path)
     hp.run_tag = make_run_tag(hp)
 
     # tune threshold
