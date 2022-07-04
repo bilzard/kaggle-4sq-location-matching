@@ -232,8 +232,9 @@ def load_model(checkpoint_path, lm, use_gpu):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", type=str)
-    parser.add_argument("val_path", type=str)
     parser.add_argument("checkpoint_path", type=str)
+    parser.add_argument("--val_path", type=str, default=None)
+    parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--output_path", type=str, default="output/result.jsonl")
     parser.add_argument("--lm", type=str, default="distilbert")
     parser.add_argument("--use_gpu", dest="use_gpu", action="store_true")
@@ -250,7 +251,10 @@ if __name__ == "__main__":
     hp.run_tag = make_run_tag(hp)
 
     # tune threshold
-    threshold = tune_threshold(model, hp)
+    if hp.val_path is not None:
+        threshold = tune_threshold(model, hp)
+    else:
+        threshold = hp.threshold
 
     # run prediction
     predict(
