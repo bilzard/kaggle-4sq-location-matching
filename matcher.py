@@ -17,15 +17,7 @@ from ditto_light.ditto import evaluate, DittoModel
 from ditto_light.exceptions import ModelNotFoundError
 from ditto_light.dataset import DittoDataset
 
-
-def set_seed(seed: int):
-    """
-    Helper function for reproducible behavior to set the seed in ``random``, ``numpy``, ``torch``
-    """
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+from train_util.seed import seed_everything
 
 
 def to_str(ent1, ent2, summarizer=None, max_len=256, dk_injector=None):
@@ -196,7 +188,7 @@ def tune_threshold(config, model, hp):
     task = hp.task
 
     # summarize the sequences up to the max sequence length
-    set_seed(123)
+    seed_everything(hp.seed)
     summarizer = injector = None
 
     # load dev sets
@@ -216,7 +208,7 @@ def tune_threshold(config, model, hp):
     f1, th = result["f1"], result["threshold"]
 
     # verify F1
-    set_seed(123)
+    seed_everything(hp.seed)
     predict(
         validset,
         "tmp.jsonl",
@@ -299,10 +291,11 @@ if __name__ == "__main__":
     parser.add_argument("--dk", type=str, default=None)
     parser.add_argument("--summarize", dest="summarize", action="store_true")
     parser.add_argument("--max_len", type=int, default=256)
+    parser.add_argument("--seed", type=int, default=123)
     hp = parser.parse_args()
 
     # load the models
-    set_seed(123)
+    seed_everything(hp.seed)
     config, model = load_model(hp.task, hp.checkpoint_path, hp.lm, hp.use_gpu, hp.fp16)
 
     summarizer = dk_injector = None
