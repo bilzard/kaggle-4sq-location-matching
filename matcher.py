@@ -44,7 +44,6 @@ def classify(sentences, model, pbar, batch_size=256, lm="distilbert", max_len=25
         sentences (list of str): the sequence pairs
         model (MultiTaskNet): the model in pytorch
         max_len (int, optional): the max sequence length
-        threshold (float, optional): the threshold of the 0's class
 
     Returns:
         list of float: the scores of the pairs
@@ -89,10 +88,7 @@ def predict(
         config (Dictionary): task configuration
         model (DittoModel): the model for prediction
         batch_size (int): the batch size
-        summarizer (Summarizer, optional): the summarization module
         max_len (int, optional): the max sequence length
-        dk_injector (DKInjector, optional): the domain-knowledge injector
-        threshold (float, optional): the threshold of the 0's class
 
     Returns:
         None
@@ -171,11 +167,9 @@ def load_model(checkpoint_path, lm, use_gpu):
     """Load a model for a specific task.
 
     Args:
-        task (str): the task name
-        path (str): the path of the checkpoint directory
+        checkpoint_path (str): the path of the model checkpoint file
         lm (str): the language model
         use_gpu (boolean): whether to use gpu
-        fp16 (boolean, optional): whether to use fp16
 
     Returns:
         Dictionary: the task config
