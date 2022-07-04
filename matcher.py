@@ -9,7 +9,7 @@ import torch
 import wandb
 
 from torch.utils import data
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from scipy.special import softmax
 from sklearn.metrics import jaccard_score
 
@@ -33,7 +33,7 @@ def make_run_tag(hp):
 
 
 def classify(
-    sentences, model, batch_size=256, lm="distilbert", max_len=256, threshold=None
+    sentences, model, pbar, batch_size=256, lm="distilbert", max_len=256, threshold=None
 ):
     """Apply the MRPC model.
 
@@ -65,6 +65,7 @@ def classify(
             probs = logits.softmax(dim=1)[:, 1]
             all_probs += probs.cpu().numpy().tolist()
             all_logits += logits.cpu().numpy().tolist()
+            pbar.update(batch.size[0])
 
     if threshold is None:
         threshold = 0.5
@@ -102,10 +103,11 @@ def predict(
     """
     sentences = []
 
-    def process_chunk(sentences, writer):
+    def process_chunk(sentences, writer, pbar):
         predictions, logits = classify(
             sentences,
             model,
+            pbar,
             batch_size=batch_size,
             lm=lm,
             max_len=max_len,
@@ -126,14 +128,17 @@ def predict(
         output_path, mode="w"
     ) as writer:
         sentences = []
-        for _, line in tqdm(enumerate(reader), total=total_inputs):
+        pbar = tqdm(total=total_inputs)
+        for i, line in enumerate(reader):
+            print("#" * 38 + f" chunk {i + 1} " + "#" * 38)
             item = line.strip().split("\t")
             sentences.append("\t".join(item))  # "(sentence1)\t(sentence2)\t0"
             if len(sentences) == chunk_size:
-                process_chunk(sentences, writer)
+                process_chunk(sentences, writer, pbar)
                 sentences.clear()
 
         if len(sentences) > 0:
+            print("#" * 38 + f" last chunk " + "#" * 38)
             process_chunk(sentences, writer)
 
     run_time = time.time() - start_time
