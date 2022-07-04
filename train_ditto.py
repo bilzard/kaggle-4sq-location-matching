@@ -2,6 +2,8 @@ import argparse
 import sys
 import wandb
 
+from multiprocessing import cpu_count
+
 sys.path.insert(0, "Snippext_public")
 
 from ditto_light.dataset import DittoDataset
@@ -41,17 +43,17 @@ if __name__ == "__main__":
     parser.add_argument("--dk", type=str, default=None)
     parser.add_argument("--summarize", dest="summarize", action="store_true")
     parser.add_argument("--size", type=int, default=None)
+    parser.add_argument("--num_workers", type=int, default=None)
 
     hp = parser.parse_args()
 
     # set seeds
     seed_everything(hp.run_id)
 
-    # only a single task for baseline
     hp.task = make_task_name(hp.train_path)
-
-    # create the tag of the run
     hp.run_tag = make_run_tag(hp)
+    if hp.num_workers is None:
+        hp.num_workers = cpu_count()
 
     # load train/dev/test sets
     train_dataset = DittoDataset(

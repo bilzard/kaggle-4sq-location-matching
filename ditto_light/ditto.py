@@ -14,6 +14,7 @@ from torch.cuda.amp import GradScaler, autocast
 from tqdm.auto import tqdm
 
 from config.model_alias import model_alias
+from ditto_light.train_util import worker_init_fn
 
 
 class DittoModel(nn.Module):
@@ -191,15 +192,17 @@ def train(trainset, validset, hp):
         dataset=trainset,
         batch_size=hp.batch_size,
         shuffle=True,
-        num_workers=0,
+        num_workers=hp.num_workers,
         collate_fn=padder,
+        worker_init_fn=worker_init_fn,
     )
     valid_iter = data.DataLoader(
         dataset=validset,
         batch_size=hp.batch_size * 16,
         shuffle=False,
-        num_workers=0,
+        num_workers=hp.num_workers,
         collate_fn=padder,
+        worker_init_fn=worker_init_fn,
     )
 
     # initialize model, optimizer, and LR scheduler
