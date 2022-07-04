@@ -6,7 +6,7 @@ sys.path.insert(0, "Snippext_public")
 
 from ditto_light.dataset import DittoDataset
 from ditto_light.ditto import train
-from train_util.seed import seed_everything
+from ditto_light.train_util import seed_everything
 
 
 def make_task_name(path):

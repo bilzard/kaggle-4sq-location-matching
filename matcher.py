@@ -14,8 +14,7 @@ from sklearn.metrics import jaccard_score
 from ditto_light.ditto import evaluate, DittoModel
 from ditto_light.exceptions import ModelNotFoundError
 from ditto_light.dataset import DittoDataset
-
-from train_util.seed import seed_everything
+from ditto_light.train_util import seed_everything
 
 
 def make_task_name(path):
