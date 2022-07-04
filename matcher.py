@@ -32,7 +32,9 @@ def make_run_tag(hp):
     return run_tag
 
 
-def classify(sentences, model, lm="distilbert", max_len=256, threshold=None):
+def classify(
+    sentences, model, batch_size=256, lm="distilbert", max_len=256, threshold=None
+):
     """Apply the MRPC model.
 
     Args:
@@ -47,7 +49,7 @@ def classify(sentences, model, lm="distilbert", max_len=256, threshold=None):
     dataset = DittoDataset(sentences, max_len=max_len, lm=lm)
     iterator = data.DataLoader(
         dataset=dataset,
-        batch_size=len(dataset),
+        batch_size=batch_size,
         shuffle=False,
         num_workers=hp.num_workers,
         collate_fn=DittoDataset.pad,
@@ -76,10 +78,11 @@ def predict(
     output_path,
     model,
     run_tag,
-    chunk_size=1024,
+    chunk_size=1024 * 16,
     lm="distilbert",
     max_len=256,
     threshold=None,
+    batch_size=256,
 ):
     """Run the model over the input file containing the candidate entry pairs
 
@@ -101,7 +104,12 @@ def predict(
 
     def process_chunk(sentences, writer):
         predictions, logits = classify(
-            sentences, model, lm=lm, max_len=max_len, threshold=threshold
+            sentences,
+            model,
+            batch_size=batch_size,
+            lm=lm,
+            max_len=max_len,
+            threshold=threshold,
         )
         scores = softmax(logits, axis=1)
         for pred, score in zip(predictions, scores):
@@ -160,6 +168,7 @@ def tune_threshold(model, hp):
         max_len=hp.max_len,
         lm=hp.lm,
         threshold=threshold,
+        batch_size=hp.batch_size,
     )
 
     predicts = []
@@ -234,6 +243,7 @@ def match(hp):
         max_len=hp.max_len,
         lm=hp.lm,
         threshold=threshold,
+        batch_size=hp.batch_size,
     )
 
 
@@ -249,7 +259,8 @@ if __name__ == "__main__":
     parser.add_argument("--fp16", dest="fp16", action="store_true")
     parser.add_argument("--max_len", type=int, default=256)
     parser.add_argument("--seed", type=int, default=123)
-    parser.add_argument("--batch_size", type=int, default=1024)
+    parser.add_argument("--batch_size", type=int, default=256)
+    parser.add_argument("--chunk_size", type=int, default=1024 * 16)
     parser.add_argument("--monitor", dest="monitor", action="store_true")
     parser.add_argument("--num_workers", type=int, default=None)
     hp = parser.parse_args()
