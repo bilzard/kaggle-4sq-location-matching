@@ -133,7 +133,7 @@ def predict(
     ) as writer:
         pbar = tqdm(total=total_inputs)
         for chunks in as_chunks(reader, chunk_size):
-            process_chunk(list(chunks), writer, pbar)
+            process_chunk(chunks, writer, pbar)
 
     run_time = time.time() - start_time
     os.system("echo %s %f >> log.txt" % (run_tag, run_time))

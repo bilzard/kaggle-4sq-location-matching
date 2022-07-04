@@ -27,7 +27,7 @@ def count_lines(path):
 def as_chunks(iterable, num_chunks):
     it = iter(iterable)
     while True:
-        chunk = tuple(itertools.islice(it, num_chunks))
+        chunk = list(itertools.islice(it, num_chunks))
         if not chunk:
             return
         yield chunk
