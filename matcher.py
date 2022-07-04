@@ -130,7 +130,6 @@ def predict(
         sentences = []
         pbar = tqdm(total=total_inputs)
         for i, line in enumerate(reader):
-            print("#" * 38 + f" chunk {i + 1} " + "#" * 38)
             item = line.strip().split("\t")
             sentences.append("\t".join(item))  # "(sentence1)\t(sentence2)\t0"
             if len(sentences) == chunk_size:
@@ -138,8 +137,7 @@ def predict(
                 sentences.clear()
 
         if len(sentences) > 0:
-            print("#" * 38 + f" last chunk " + "#" * 38)
-            process_chunk(sentences, writer)
+            process_chunk(sentences, writer, pbar)
 
     run_time = time.time() - start_time
     os.system("echo %s %f >> log.txt" % (run_tag, run_time))
