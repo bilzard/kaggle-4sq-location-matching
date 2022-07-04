@@ -14,7 +14,7 @@ from sklearn.metrics import jaccard_score
 from ditto_light.ditto import evaluate, DittoModel
 from ditto_light.exceptions import ModelNotFoundError
 from ditto_light.dataset import DittoDataset
-from ditto_light.train_util import seed_everything
+from ditto_light.train_util import seed_everything, set_open_func
 
 
 def make_task_name(path):
@@ -111,8 +111,7 @@ def predict(
 
     # batch processing
     start_time = time.time()
-    openfunc = gzip.open if input_path.endswith(".tsv.gz") else open
-    with openfunc(input_path, "rt") as reader, jsonlines.open(
+    with set_open_func(input_path)(input_path, "rt") as reader, jsonlines.open(
         output_path, mode="w"
     ) as writer:
         sentences = []
@@ -167,8 +166,7 @@ def tune_threshold(model, hp):
     os.system("rm tmp.jsonl")
 
     labels = []
-    openfunc = gzip.open if hp.val_path.endswith(".tsv.gz") else open
-    with openfunc(hp.val_path, "rt") as fp:
+    with set_open_func(hp.val_path)(hp.val_path, "rt") as fp:
         for line in fp:
             labels.append(int(line.split("\t")[-1]))
 
