@@ -74,7 +74,7 @@ def predict(
     output_path,
     model,
     run_tag,
-    batch_size=1024,
+    chunk_size=1024,
     lm="distilbert",
     max_len=256,
     threshold=None,
@@ -97,7 +97,7 @@ def predict(
     """
     sentences = []
 
-    def process_batch(sentences, writer):
+    def process_chunk(sentences, writer):
         predictions, logits = classify(
             sentences, model, lm=lm, max_len=max_len, threshold=threshold
         )
@@ -109,7 +109,7 @@ def predict(
             }
             writer.write(output)
 
-    # batch processing
+    # processing with chunks
     start_time = time.time()
     total_inputs = count_lines(input_path)
     with set_open_func(input_path)(input_path, "rt") as reader, jsonlines.open(
@@ -119,12 +119,12 @@ def predict(
         for _, line in tqdm(enumerate(reader), total=total_inputs):
             item = line.strip().split("\t")
             sentences.append("\t".join(item))  # "(sentence1)\t(sentence2)\t0"
-            if len(sentences) == batch_size:
-                process_batch(sentences, writer)
+            if len(sentences) == chunk_size:
+                process_chunk(sentences, writer)
                 sentences.clear()
 
         if len(sentences) > 0:
-            process_batch(sentences, writer)
+            process_chunk(sentences, writer)
 
     run_time = time.time() - start_time
     os.system("echo %s %f >> log.txt" % (run_tag, run_time))
