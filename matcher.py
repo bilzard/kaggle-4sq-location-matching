@@ -14,7 +14,7 @@ from sklearn.metrics import jaccard_score
 from ditto_light.ditto import evaluate, DittoModel
 from ditto_light.exceptions import ModelNotFoundError
 from ditto_light.dataset import DittoDataset
-from ditto_light.train_util import seed_everything, set_open_func
+from ditto_light.train_util import seed_everything, set_open_func, count_lines
 
 
 def make_task_name(path):
@@ -111,11 +111,12 @@ def predict(
 
     # batch processing
     start_time = time.time()
+    total_inputs = count_lines(input_path)
     with set_open_func(input_path)(input_path, "rt") as reader, jsonlines.open(
         output_path, mode="w"
     ) as writer:
         sentences = []
-        for idx, line in tqdm(enumerate(reader)):
+        for _, line in tqdm(enumerate(reader), total=total_inputs):
             item = line.strip().split("\t")
             sentences.append("\t".join(item))  # "(sentence1)\t(sentence2)\t0"
             if len(sentences) == batch_size:
