@@ -140,7 +140,7 @@ def tune_threshold(model, hp):
     valid_dataset = DittoDataset(hp.val_path, max_len=hp.max_len, lm=hp.lm)
     valid_iter = data.DataLoader(
         dataset=valid_dataset,
-        batch_size=64,
+        batch_size=hp.batch_size,
         shuffle=False,
         num_workers=0,
         collate_fn=DittoDataset.pad,
@@ -223,6 +223,7 @@ if __name__ == "__main__":
     parser.add_argument("--fp16", dest="fp16", action="store_true")
     parser.add_argument("--max_len", type=int, default=256)
     parser.add_argument("--seed", type=int, default=123)
+    parser.add_argument("--batch_size", type=int, default=256)
     hp = parser.parse_args()
 
     # load the models
