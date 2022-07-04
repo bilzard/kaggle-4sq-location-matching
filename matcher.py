@@ -1,10 +1,10 @@
 import argparse
-import gzip
 import os
 import time
 
-import torch
 import jsonlines
+import torch
+import wandb
 
 from torch.utils import data
 from tqdm import tqdm
@@ -233,19 +233,20 @@ if __name__ == "__main__":
     hp.task = make_task_name(hp.input_path)
     hp.run_tag = make_run_tag(hp)
 
-    # tune threshold
-    if hp.val_path is not None:
-        threshold = tune_threshold(model, hp)
-    else:
-        threshold = hp.threshold
+    with wandb.init(project="4sq-matcher", name=hp.run_tag, config=vars(hp)):
+        # tune threshold
+        if hp.val_path is not None:
+            threshold = tune_threshold(model, hp)
+        else:
+            threshold = hp.threshold
 
-    # run prediction
-    predict(
-        hp.input_path,
-        hp.output_path,
-        model,
-        hp.run_tag,
-        max_len=hp.max_len,
-        lm=hp.lm,
-        threshold=threshold,
-    )
+        # run prediction
+        predict(
+            hp.input_path,
+            hp.output_path,
+            model,
+            hp.run_tag,
+            max_len=hp.max_len,
+            lm=hp.lm,
+            threshold=threshold,
+        )
