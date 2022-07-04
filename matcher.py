@@ -118,7 +118,7 @@ def predict(
         sentences = []
         for idx, line in tqdm(enumerate(reader)):
             item = line.strip().split("\t")
-            sentences.append("\t".join(*item[:2]))  # "(sentence1)\t(sentence2)"
+            sentences.append("\t".join(item[:2]))  # "(sentence1)\t(sentence2)"
             if len(sentences) == batch_size:
                 process_batch(sentences, writer)
                 sentences.clear()
