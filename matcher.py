@@ -181,10 +181,10 @@ def tune_threshold(model, hp):
         for line in fp:
             labels.append(int(line.split("\t")[-1]))
 
-    # Q: What is the difference between score & real_score?
-    real_score = jaccard_score(labels, predicts)
-    output = {**result, "real_score": real_score}
-    print(", ".join(f"val/{key}={val:.5f}" for key, val in output.items()))
+    # Check if actual score
+    pred_score = jaccard_score(labels, predicts)
+    print(", ".join(f"val/{key}={val:.5f}" for key, val in result.items()))
+    print(f"eval score: {result['iou']}, pred scpre: {pred_score:.5f}")
 
     return threshold
 
