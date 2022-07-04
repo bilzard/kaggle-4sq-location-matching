@@ -214,8 +214,8 @@ def load_model(checkpoint_path, lm, use_gpu):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("input_path", type=str, required=True)
-    parser.add_argument("checkpoint_path", type=str, required=True)
+    parser.add_argument("input_path", type=str)
+    parser.add_argument("checkpoint_path", type=str)
     parser.add_argument("--val_path", type=str, default=None)
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--output_path", type=str, default="output/result.jsonl")

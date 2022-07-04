@@ -24,8 +24,8 @@ def make_run_tag(hp):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("train_path", type=str, required=True)
-    parser.add_argument("val_path", type=str, required=True)
+    parser.add_argument("train_path", type=str)
+    parser.add_argument("val_path", type=str)
     parser.add_argument("--run_id", type=int, default=0)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--max_len", type=int, default=256)
