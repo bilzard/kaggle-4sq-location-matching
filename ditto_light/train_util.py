@@ -21,7 +21,7 @@ def count_lines(path):
     with set_open_func(path)(path, "rt") as fp:
         for i, _ in enumerate(fp):
             pass
-    return i
+    return i + 1
 
 
 def as_chunks(iterable, num_chunks):
