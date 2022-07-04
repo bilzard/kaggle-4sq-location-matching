@@ -59,7 +59,7 @@ def classify(
     all_probs = []
     all_logits = []
     with torch.no_grad():
-        for i, batch in enumerate(iterator):
+        for batch in iterator:
             x, _ = batch
             logits = model(x)
             probs = logits.softmax(dim=1)[:, 1]
@@ -129,7 +129,7 @@ def predict(
     ) as writer:
         sentences = []
         pbar = tqdm(total=total_inputs)
-        for i, line in enumerate(reader):
+        for line in reader:
             item = line.strip().split("\t")
             sentences.append("\t".join(item))  # "(sentence1)\t(sentence2)\t0"
             if len(sentences) == chunk_size:
