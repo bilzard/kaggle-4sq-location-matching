@@ -1,5 +1,5 @@
 import argparse
-import gzlib
+import gzip
 import os
 import time
 
@@ -112,7 +112,7 @@ def predict(
 
     # batch processing
     start_time = time.time()
-    openfunc = gzlib.open if input_path.endswith(".tsv.gz") else open
+    openfunc = gzip.open if input_path.endswith(".tsv.gz") else open
     with openfunc(input_path, "rt") as reader, jsonlines.open(
         output_path, mode="w"
     ) as writer:
