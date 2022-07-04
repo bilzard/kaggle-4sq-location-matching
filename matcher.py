@@ -167,7 +167,8 @@ def tune_threshold(model, hp):
     os.system("rm tmp.jsonl")
 
     labels = []
-    with open(hp.val_path) as fp:
+    openfunc = gzip.open if hp.val_path.endswith(".tsv.gz") else open
+    with openfunc(hp.val_path, "rt") as fp:
         for line in fp:
             labels.append(int(line.split("\t")[-1]))
 
