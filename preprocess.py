@@ -3,8 +3,8 @@ import os
 
 import pandas as pd
 
-from general.util import import_by_name, show_memory_usage
-from general.tabular import sort_by_categorical
+from general.util import import_by_name
+from general.tabular import sort_by_categorical, show_memory_usage
 
 
 def preprocess(hp):

@@ -8,7 +8,8 @@ import h3
 import pandas as pd
 
 from tqdm import tqdm
-from general.util import show_memory_usage, import_by_name
+from general.util import import_by_name
+from general.tabular import show_memory_usage
 
 
 def geo_to_h3_res(data, resolution):
