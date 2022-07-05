@@ -10,10 +10,11 @@ def preprocess(hp):
     Preprocessor = import_by_name(f"preprocess.{hp.preprocessor}", "Processor")
 
     input_df = pd.read_csv(f"{hp.input_path}")
+    h3_df = pd.read_csv(hp.h3_path)
+
     pre_processor = Preprocessor()
     target_df = pre_processor.run(input_df)
 
-    h3_df = pd.read_csv(hp.h3_path)
     target_df = target_df.merge(h3_df, on="id")
     target_df.to_csv(
         os.path.join(hp.output_path, "preprocessed.csv.gz"),
