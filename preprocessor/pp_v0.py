@@ -1,5 +1,11 @@
 from functools import partial
-from transform import fill_na, filter_spam_v1, normalize, fill_blank, compose
+from preprocessor.transform import (
+    fill_na,
+    filter_spam_v1,
+    normalize,
+    fill_blank,
+    compose,
+)
 
 
 class Preprocessor:
