@@ -7,7 +7,7 @@ from general.util import import_by_name, show_memory_usage
 
 
 def preprocess(hp):
-    Preprocessor = import_by_name(f"preprocessor.{hp.preprocessor}", "Processor")
+    Preprocessor = import_by_name(f"preprocessor.{hp.preprocessor}", "Preprocessor")
     cfg = import_by_name(f"config.{hp.config}", "cfg")
 
     input_df = pd.read_csv(f"{hp.input_path}")
