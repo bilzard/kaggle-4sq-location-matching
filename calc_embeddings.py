@@ -11,7 +11,7 @@ from general.array import MemMapSequentialWriter
 
 def calc_embeddings(hp):
     cfg = import_by_name(f"config.{hp.config}", "cfg")
-    assert hp.column in cfg.text_columns, f"column should be text column"
+    assert hp.column in cfg.text_cols, f"column should be text column"
 
     model = SentenceTransformer(hp.model)
     n_dims = model.get_sentence_embedding_dimension()
