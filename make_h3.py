@@ -5,22 +5,10 @@ from functools import partial
 from multiprocessing import Pool, cpu_count
 
 import h3
-from humanize import naturalsize
 import pandas as pd
 
 from tqdm import tqdm
-
-
-def show_memory_usage(df):
-    total_usage = 0
-
-    print("Memory usage:")
-    for col in df.columns:
-        usage = df[col].memory_usage(deep=True)
-        total_usage += usage
-        print(f"  - {col}: {naturalsize(usage)}")
-
-    print(f"Total: {naturalsize(total_usage)}")
+from general.util import show_memory_usage
 
 
 def geo_to_h3_res(data, resolution):
