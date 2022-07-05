@@ -14,3 +14,4 @@ cfg.text_cols = [
     "categories",
 ]
 cfg.num_cols = ["latitude", "longitude"]
+cfg.h3_resolution = 1

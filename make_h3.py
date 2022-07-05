@@ -8,7 +8,7 @@ import h3
 import pandas as pd
 
 from tqdm import tqdm
-from general.util import show_memory_usage
+from general.util import show_memory_usage, import_by_name
 
 
 def geo_to_h3_res(data, resolution):
@@ -17,19 +17,22 @@ def geo_to_h3_res(data, resolution):
 
 
 def make_h3(hp):
-    h3_col = f"h3_res{hp.resolution}"
+    cfg = import_by_name(f"config.{hp.config}", "cfg")
+    resolution = cfg.h3_resolution
+
+    h3_col = f"h3_res{resolution}"
     train = pd.read_csv(hp.input_path)
     lats, lons = train["latitude"].to_numpy(), train["longitude"].to_numpy()
 
     h3_df = pd.DataFrame({"id": train["id"]})
     n_thread = hp.num_workers * 2
     with Pool(n_thread) as p:
-        converter = partial(geo_to_h3_res, resolution=hp.resolution)
+        converter = partial(geo_to_h3_res, resolution=resolution)
         h3_df[h3_col] = list(p.imap(converter, tqdm(zip(lats, lons), total=len(lats))))
 
     show_memory_usage(h3_df)
     h3_df.to_csv(
-        os.path.join(hp.output_path, f"h3_res{hp.resolution}.csv.gz"),
+        os.path.join(hp.output_path, f"h3_res{resolution}.csv.gz"),
         compression="gzip",
         index=False,
     )
@@ -38,8 +41,8 @@ def make_h3(hp):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", type=str)
+    parser.add_argument("--config", type=str, default="base")
     parser.add_argument("--output_path", type=str, default="./output")
-    parser.add_argument("--resolution", type=int, default=1)
     parser.add_argument("--num_workers", type=int, default=None)
     hp = parser.parse_args()
 
