@@ -19,8 +19,8 @@ from ditto_light.train_util import (
     seed_everything,
     set_open_func,
     count_lines,
-    as_chunks,
 )
+from general.util import as_chunks
 
 
 def make_task_name(path):

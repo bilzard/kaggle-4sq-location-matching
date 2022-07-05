@@ -24,15 +24,6 @@ def count_lines(path):
     return i + 1
 
 
-def as_chunks(iterable, num_chunks):
-    it = iter(iterable)
-    while True:
-        chunk = list(itertools.islice(it, num_chunks))
-        if not chunk:
-            return
-        yield chunk
-
-
 def worker_init_fn(worker_id):
     worker_seed = np.random.get_state()[1][0] + worker_id
     np.random.seed(worker_seed)
