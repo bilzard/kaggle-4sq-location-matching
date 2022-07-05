@@ -1,12 +1,10 @@
 import argparse
 import os.path as osp
 
-import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
 
-from general.util import import_by_name, as_chunks
+from general.util import import_by_name
 from general.array import MemMapSequentialWriter
 
 
