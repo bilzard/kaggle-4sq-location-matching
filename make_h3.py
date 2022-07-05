@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from functools import partial
 from multiprocessing import Pool, cpu_count
@@ -39,12 +40,17 @@ def make_h3(hp):
         h3_df[h3_col] = list(p.imap(converter, tqdm(zip(lats, lons), total=len(lats))))
 
     show_memory_usage(h3_df)
-    h3_df.to_csv(f"h3_res{hp.resolution}.csv.gz", compression="gzip", index=False)
+    h3_df.to_csv(
+        os.path.join(hp.output_path, f"h3_res{hp.resolution}.csv.gz"),
+        compression="gzip",
+        index=False,
+    )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", type=str)
+    parser.add_argument("--ouput_ptah", type=str, default="./")
     parser.add_argument("--resolution", type=int, default=1)
     parser.add_argument("--num_workers", type=int, default=None)
     hp = parser.parse_args()
