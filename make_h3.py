@@ -50,7 +50,7 @@ def make_h3(hp):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", type=str)
-    parser.add_argument("--output_path", type=str, default="./")
+    parser.add_argument("--output_path", type=str, default="./output")
     parser.add_argument("--resolution", type=int, default=1)
     parser.add_argument("--num_workers", type=int, default=None)
     hp = parser.parse_args()
