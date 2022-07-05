@@ -4,11 +4,13 @@ import os
 import pandas as pd
 
 from general.util import import_by_name, show_memory_usage
+from general.tabular import sort_by_categorical
 
 
 def preprocess(hp):
     Preprocessor = import_by_name(f"preprocessor.{hp.preprocessor}", "Preprocessor")
     cfg = import_by_name(f"config.{hp.config}", "cfg")
+    h3_col = f"h3_res{cfg.h3_resolution}"
 
     input_df = pd.read_csv(f"{hp.input_path}")
     h3_df = pd.read_csv(hp.h3_path)
@@ -22,6 +24,7 @@ def preprocess(hp):
         compression="gzip",
         index=False,
     )
+    target_df = sort_by_categorical(target_df, h3_col)
     show_memory_usage(target_df)
 
 
