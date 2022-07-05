@@ -4,6 +4,7 @@ import os.path as osp
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
 
 from general.util import import_by_name, as_chunks
 from general.array import MemMapSequentialWriter
@@ -34,7 +35,9 @@ def calc_embeddings(hp):
         shape=(n_items, n_dims),
     )
 
-    for chunk in reader:
+    total_chunks = n_items // hp.chunk_size + 1
+    for i, chunk in enumerate(reader):
+        print("=" * 38 + f" chunk {i}/{total_chunks} " + "=" * 38)
         sentences = chunk[hp.column].to_numpy()
         embeddings_chunk = model.encode(
             sentences, show_progress_bar=True, batch_size=hp.batch_size
