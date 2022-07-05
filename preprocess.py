@@ -19,13 +19,14 @@ def preprocess(hp):
     target_df = pre_processor.run(input_df)
 
     target_df = target_df.merge(h3_df, on="id")
+    target_df = sort_by_categorical(target_df, h3_col)
+
+    show_memory_usage(target_df)
     target_df.to_csv(
         os.path.join(hp.output_path, "preprocessed.csv.gz"),
         compression="gzip",
         index=False,
     )
-    target_df = sort_by_categorical(target_df, h3_col)
-    show_memory_usage(target_df)
 
 
 if __name__ == "__main__":
