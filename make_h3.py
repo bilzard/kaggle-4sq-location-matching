@@ -21,7 +21,6 @@ def make_h3(hp):
     cfg = import_by_name(f"config.{hp.config}", "cfg")
     resolution = cfg.h3_resolution
 
-    h3_col = f"h3_res{resolution}"
     train = pd.read_csv(hp.input_path)
     lats, lons = train["latitude"].to_numpy(), train["longitude"].to_numpy()
 
@@ -29,7 +28,9 @@ def make_h3(hp):
     n_thread = hp.num_workers * 2
     with Pool(n_thread) as p:
         converter = partial(geo_to_h3_res, resolution=resolution)
-        h3_df[h3_col] = list(p.imap(converter, tqdm(zip(lats, lons), total=len(lats))))
+        h3_df[cfg.h3_col] = list(
+            p.imap(converter, tqdm(zip(lats, lons), total=len(lats)))
+        )
 
     show_memory_usage(h3_df)
     h3_df.to_csv(
