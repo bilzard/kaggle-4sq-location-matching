@@ -28,7 +28,7 @@ def calc_embeddings(hp):
         input_df[hp.column] = input_df[hp.column].str.replace(", ", " [SEP] ")
         timer.endshow()
 
-        # show rows which contains special token
+        print("Rows which contains special token:")
         filter_special_token = input_df[hp.column].str.contains("[SEP]", regex=False)
         print(input_df[filter_special_token].head())
 
