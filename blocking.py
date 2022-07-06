@@ -71,6 +71,7 @@ def transform_embeddings_list(embeddings_list, input_size, cfg):
     ]
 
     for embeddings, embeddings_norm in zip(embeddings_list, embeddings_list_norm):
+        embeddings_norm[:] = embeddings[:]
         subtract_mean(embeddings, embeddings_norm)
         normalize_L2(embeddings_norm, embeddings_norm)
         embeddings_norm.flags.writeable = False

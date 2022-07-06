@@ -28,7 +28,7 @@ def subtract_mean(src, dst):
     dst[:] -= src.mean(axis=0, keepdims=True)[:]
 
 
-def normalize_L2(dst, src):
+def normalize_L2(src, dst):
     dst[:] /= ((src**2).sum(axis=1, keepdims=True) ** 0.5)[:]
 
 
