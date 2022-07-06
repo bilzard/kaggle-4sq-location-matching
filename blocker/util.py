@@ -33,7 +33,9 @@ def normalize_L2(src, dst):
 
 
 def concat_embeddings(embeddings_list, weights):
-    assert len(embeddings_list) == len(weights)
+    assert len(embeddings_list) == len(
+        weights
+    ), f"{len(embeddings_list)}, {len(weights)}"
     return np.concatenate(
         [w * ebd for ebd, w in zip(embeddings_list, weights)], axis=-1
     )
