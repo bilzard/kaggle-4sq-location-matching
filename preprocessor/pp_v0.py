@@ -1,9 +1,6 @@
 from functools import partial
 from preprocessor.transform import (
     fill_na,
-    filter_spam_v1,
-    normalize,
-    fill_blank,
     compose,
 )
 
@@ -18,4 +15,6 @@ class Preprocessor:
 
     def run(self, df):
         df = self.transforms(df)
+        print("Proportion of filled rows:")
+        print((1 - (df.isna().sum(axis=0) / len(df))).reset_index())
         return df
