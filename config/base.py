@@ -19,7 +19,7 @@ cfg.h3_col = f"h3_res{cfg.h3_resolution}"
 cfg.text_embedding_cols = ["name", "categories"]
 cfg.k_neighbor = 25
 cfg.blocker_weights = {
-    "text": [1, 0.341558957832999],
+    "text": [1, 0.3415],
     "location": [1],
-    "combination": [1, 0.5565469424215815, 911.5858177455376],
+    "combination": [1, 0.4521, 789.4274],
 }
