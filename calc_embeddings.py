@@ -20,6 +20,7 @@ def calc_embeddings(hp):
         f"{hp.input_path}",
         compression="gzip",
         usecols=[hp.column],
+        keep_default_na=False,
     )
     n_items = len(input_df)
     if hp.column == "categories":
@@ -43,6 +44,7 @@ def calc_embeddings(hp):
         compression="gzip",
         usecols=[hp.column],
         chunksize=hp.chunk_size,
+        keep_default_na=False,
     )
     writer = MemMapSequentialWriter(
         osp.join(hp.output_path, f"embeddings_{hp.column}.mmp"),
