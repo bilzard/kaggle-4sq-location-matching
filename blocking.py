@@ -91,11 +91,6 @@ def block(hp):
         cfg.blocker_weights[hp.blocker_type],
         hp,
         cfg,
-        k_neighbor=hp.k_neighbor,
-        normalize=hp.normalize,
-        evaluate=hp.evaluate,
-        monitor=hp.monitor,
-        debug_iter=hp.debug_iter,
     )
 
 

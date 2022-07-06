@@ -10,11 +10,6 @@ def do_blocking(
     weight_list,
     hp,
     cfg,
-    k_neighbor=25,
-    normalize=True,
-    evaluate=False,
-    monitor=True,
-    debug_iter=0,
 ):
     grouped = df.groupby(cfg.h3_col)
     h3_to_count = df.value_counts(cfg.h3_col)
@@ -36,11 +31,11 @@ def do_blocking(
     pbar = tqdm(total=len(df))
     n = 0
     for i, (origin, query_df) in enumerate(grouped):
-        if debug_iter > 0:
-            if i > debug_iter:
+        if hp.debug_iter > 0:
+            if i > hp.debug_iter:
                 continue
         n += 1
-        if monitor:
+        if hp.monitor:
             set_exponential_monitor(logger, n)
         else:
             logger.set_debug(False)
@@ -59,7 +54,7 @@ def do_blocking(
         logger.log(f"  - #points in query: {len(query_df)}")
         logger.log(f"  - #points in search space: {len(search_df)}")
 
-        k = min(len(search_df), k_neighbor)
+        k = min(len(search_df), hp.k_neighbor)
         if len(search_df) > 1:
             logger.log("Calculate Embeddings:")
             global_search_index = search_df["index"].to_numpy()
@@ -73,7 +68,7 @@ def do_blocking(
             query = search[query_idx]
 
             if hp.blocker_type in {"text", "combination"}:
-                predictor = GeneralPredictor(k_neighbor=k, normalize=normalize)
+                predictor = GeneralPredictor(k_neighbor=k, normalize=hp.normalize)
             elif hp.blocker_type == "location":
                 predictor = LocationPredictor(k_neighbor=k)
             else:
@@ -111,7 +106,7 @@ def do_blocking(
         distances_list.append(distances)
 
     print("=" * 80)
-    if monitor:
+    if hp.monitor:
         if hp.evaluate:
             score = simple_eval(recalls, weights, len(df))
             print(f"approximate score: {score:.4f}")
