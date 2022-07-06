@@ -13,16 +13,6 @@ class Preprocessor:
         self.transforms = compose(
             [
                 partial(fill_na, cols=cfg.text_cols),
-                filter_spam_v1,
-                partial(
-                    normalize,
-                    cols=cfg.text_cols,
-                    lower=True,
-                    uc_format=None,
-                    remove_non_word=False,
-                    norm_blank=True,
-                ),
-                partial(fill_blank, cols=cfg.text_cols),
             ]
         )
 
