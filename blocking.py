@@ -21,7 +21,13 @@ def load_data(hp, cfg):
         usecols += ["point_of_interest"]
 
     input_df = pd.read_csv(f"{hp.input_path}", compression="gzip", usecols=usecols)
-    input_df[cfg.h3_col] = input_df[cfg.h3_col].astype("category")
+
+    # set categorical type ordered by value counts
+    h3_to_count = input_df.value_counts(cfg.h3_col)
+    h3_df = pd.DataFrame({"count": h3_to_count}).reset_index()
+    cat = pd.CategoricalDtype(h3_df[cfg.h3_col], ordered=True)
+    input_df[cfg.h3_col] = pd.Categorical(input_df[cfg.h3_col].astype(cat))
+
     if hp.evaluate:
         input_df["point_of_interest"] = input_df["point_of_interest"].astype("category")
 
