@@ -78,7 +78,7 @@ def block(hp):
     input_df = load_data(hp, cfg)
 
     # subtract mean embedding & normalize(switched by option)
-    embeddings_list = load_embeddings_list(hp.blocker_type, input_df)
+    embeddings_list = load_embeddings_list(hp, cfg, input_df)
     if hp.blocker_type in {"combination", "text"}:
         embeddings_list[: len(cfg.text_embedding_cols)] = transform_embeddings_list(
             embeddings_list[: len(cfg.text_embedding_cols)], len(input_df), cfg
