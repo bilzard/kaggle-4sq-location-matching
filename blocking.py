@@ -59,24 +59,13 @@ def load_embeddings_list(hp, cfg, input_df):
     return embeddings_list
 
 
-def transform_embeddings_list(embeddings_list, input_size, cfg):
-    embeddings_list_norm = [
-        np.memmap(
-            osp.join(hp.output_path, f"embeddings_{col}_norm.mmp"),
-            mode="w+",
-            dtype="float32",
-            shape=(input_size, 384),  # TODO: preserve shape and dtype in metadata
-        )
-        for col in cfg.text_embedding_cols
-    ]
-
-    for embeddings, embeddings_norm in zip(embeddings_list, embeddings_list_norm):
+def transform_embeddings_list(embeddings_list_src, embeddings_list_dst):
+    for embeddings, embeddings_norm in zip(embeddings_list_src, embeddings_list_dst):
         embeddings_norm[:] = embeddings[:]
         subtract_mean(embeddings, embeddings_norm)
         normalize_L2(embeddings_norm, embeddings_norm)
-        embeddings_norm.flags.writeable = False
-
-    return embeddings_list_norm
+        if isinstance(embeddings_norm, np.memmap):
+            embeddings_norm.flags.writeable = False
 
 
 def block(hp):
@@ -87,9 +76,21 @@ def block(hp):
     print("Normalize embeddings:")
     embeddings_list = load_embeddings_list(hp, cfg, input_df)
     if hp.blocker_type in {"combination", "text"}:
-        embeddings_list[: len(cfg.text_embedding_cols)] = transform_embeddings_list(
-            embeddings_list[: len(cfg.text_embedding_cols)], len(input_df), cfg
-        )
+        embeddings_list_norm = [
+            np.memmap(
+                osp.join(hp.output_path, f"embeddings_{col}_norm.mmp"),
+                mode="w+",
+                dtype="float32",
+                shape=(
+                    len(input_df),
+                    384,
+                ),  # TODO: preserve shape and dtype in metadata
+            )
+            for col in cfg.text_embedding_cols
+        ]
+        if hp.blocker_type == "combination":
+            embeddings_list_norm += [embeddings_list[-1]]
+        transform_embeddings_list(embeddings_list, embeddings_list_norm)
 
     print("Blocking:")
     do_blocking(
