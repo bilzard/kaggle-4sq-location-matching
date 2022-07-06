@@ -27,6 +27,10 @@ def calc_embeddings(hp):
         input_df[hp.column] = input_df[hp.column].str.replace(", ", " [SEP] ")
         timer.endshow()
 
+        # show rows which contains special token
+        filter_special_token = input_df[hp.column].str.contains("[SEP]", regex=False)
+        print(input_df[filter_special_token].head())
+
     timer.start("Saving updated dataframe")
     input_df.to_csv(
         osp.join(hp.output_path, "tmp.csv.gz"), compression="gzip", index=False
