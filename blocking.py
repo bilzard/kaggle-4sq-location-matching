@@ -18,12 +18,12 @@ from blocker.blocker import do_blocking
 def load_data(hp, cfg):
     usecols = ["id", cfg.h3_col]
     if hp.evaluate:
-        usecols += "point_of_interest"
+        usecols += ["point_of_interest"]
 
     input_df = pd.read_csv(f"{hp.input_path}", compression="gzip", usecols=usecols)
-    usecols[cfg.h3_col] = usecols[cfg.h3_col].astype("category")
+    input_df[cfg.h3_col] = input_df[cfg.h3_col].astype("category")
     if hp.evaluate:
-        usecols["point_of_interest"] = usecols["point_of_interest"].astype("category")
+        input_df["point_of_interest"] = input_df["point_of_interest"].astype("category")
 
     print(f"Memory usage of input dataframe:")
     show_memory_usage(input_df)
