@@ -90,7 +90,7 @@ def block(hp):
         ]
         if hp.blocker_type == "combination":
             embeddings_list_norm += [embeddings_list[-1]]
-        transform_embeddings_list(embeddings_list, embeddings_list_norm)
+        transform_embeddings_list(embeddings_list[:2], embeddings_list_norm[:2])
 
     print("Blocking:")
     do_blocking(
