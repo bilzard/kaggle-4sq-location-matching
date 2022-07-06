@@ -109,7 +109,7 @@ class LocationPredictor:
         assert query.shape[-1] == search.shape[-1]
         assert query.shape[0] <= search.shape[0], f"{query.shape[0]} {search.shape[0]}"
 
-        knn = HaversineNeighborSearcher(self.k_neighbor, metric=self.metric)
+        knn = HaversineNeighborSearcher(self.k_neighbor)
         knn.fit(search)
 
         I, D = knn.search(query)
