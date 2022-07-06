@@ -36,6 +36,8 @@ def calc_embeddings(hp):
     total_chunks = n_items // hp.chunk_size + 1
     for i, chunk in enumerate(reader):
         print("=" * 38 + f" chunk {i}/{total_chunks} " + "=" * 38)
+        if hp.column == "categories":
+            chunk[hp.column] = chunk[hp.column].str.replace(", ", " [SEP] ")
         sentences = chunk[hp.column].to_numpy()
         embeddings_chunk = model.encode(
             sentences, show_progress_bar=True, batch_size=hp.batch_size
@@ -50,7 +52,9 @@ if __name__ == "__main__":
     parser.add_argument("input_path", type=str)
     parser.add_argument("model", type=str)
     parser.add_argument("--output_path", type=str, default="./output")
-    parser.add_argument("--column", type=str, default="name")
+    parser.add_argument(
+        "--column", type=str, choices={"name", "categories"}, default="name"
+    )
     parser.add_argument("--batch_size", type=str, default=256)
     parser.add_argument("--chunk_size", type=str, default=1024 * 256)
     parser.add_argument("--config", type=str, default="base")
