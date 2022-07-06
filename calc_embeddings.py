@@ -6,23 +6,36 @@ from sentence_transformers import SentenceTransformer
 
 from general.util import import_by_name
 from general.array import MemMapSequentialWriter
+from general.profile import SimpleTimer
 
 
 def calc_embeddings(hp):
     cfg = import_by_name(f"config.{hp.config}", "cfg")
     assert hp.column in cfg.text_cols, f"column should be text column"
+    timer = SimpleTimer()
 
     model = SentenceTransformer(hp.model)
     n_dims = model.get_sentence_embedding_dimension()
-    n_items = len(
-        pd.read_csv(
-            f"{hp.input_path}",
-            compression="gzip",
-            usecols=[hp.column],
-        )
+    input_df = pd.read_csv(
+        f"{hp.input_path}",
+        compression="gzip",
+        usecols=[hp.column],
     )
+    n_items = len(input_df)
+    if hp.column == "categories":
+        timer.start("Replacing cammas to the special token `[SEP]`")
+        input_df[hp.column] = input_df[hp.column].str.replace(", ", " [SEP] ")
+        timer.endshow()
+
+    timer.start("Saving updated dataframe")
+    input_df.to_csv(
+        osp.join(hp.output_path, "tmp.csv.gz"), compression="gzip", index=False
+    )
+    timer.endshow()
+    del input_df
+
     reader = pd.read_csv(
-        hp.input_path,
+        osp.join(hp.output_path, "tmp.csv.gz"),
         compression="gzip",
         usecols=[hp.column],
         chunksize=hp.chunk_size,
@@ -36,8 +49,6 @@ def calc_embeddings(hp):
     total_chunks = n_items // hp.chunk_size + 1
     for i, chunk in enumerate(reader):
         print("=" * 38 + f" chunk {i}/{total_chunks} " + "=" * 38)
-        if hp.column == "categories":
-            chunk[hp.column] = chunk[hp.column].str.replace(", ", " [SEP] ")
         sentences = chunk[hp.column].to_numpy()
         embeddings_chunk = model.encode(
             sentences, show_progress_bar=True, batch_size=hp.batch_size
