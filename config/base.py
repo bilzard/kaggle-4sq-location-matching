@@ -21,5 +21,5 @@ cfg.k_neighbor = 25
 cfg.blocker_weights = {
     "text": [1, 0.341558957832999],
     "location": [1],
-    "combination": [1, 0.4145436140752685, 744.432856024284],
+    "combination": [1, 0.4509794940496579, 861.3927932470813],
 }
