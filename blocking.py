@@ -16,7 +16,7 @@ from blocker.blocker import do_blocking
 
 
 def load_data(hp, cfg):
-    usecols = ["id", cfg.h3_col]
+    usecols = ["id", "latitude", "longitude", cfg.h3_col]
     if hp.evaluate:
         usecols += ["point_of_interest"]
 
