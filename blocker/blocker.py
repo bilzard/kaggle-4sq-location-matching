@@ -21,7 +21,7 @@ def do_blocking(
     origin_to_search_point = {
         origin: get_search_points(origin) for origin in h3_to_count.keys()
     }
-    point_set = set(df[hp.h3_col].unique().tolist())
+    point_set = set(df[cfg.h3_col].unique().tolist())
     logger = Logger()
 
     recalls = []
@@ -53,8 +53,8 @@ def do_blocking(
         search_points = [pt for pt in search_points if pt in point_set]
         search_df = pd.concat([grouped.get_group(pt) for pt in search_points])
         search_df = search_df.reset_index()
-        query_set = set(query_df[hp.h3_col].unique().tolist())
-        query_idx = search_df.query(f"{hp.h3_col} in @query_set").index
+        query_set = set(query_df[cfg.h3_col].unique().tolist())
+        query_idx = search_df.query(f"{cfg.h3_col} in @query_set").index
 
         logger.log(f"  - #points in query: {len(query_df)}")
         logger.log(f"  - #points in search space: {len(search_df)}")
