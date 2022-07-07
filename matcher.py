@@ -101,7 +101,7 @@ def predict(
         for chunk in reader:
             sentences = chunk.apply(
                 lambda x: "\t".join([x["left"], x["right"], str(x["matched"])]), axis=1
-            ).to_numpy()
+            ).to_list()
 
             probs = classify(
                 sentences,
