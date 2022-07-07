@@ -110,9 +110,9 @@ def predict(
                 lm=lm,
                 max_len=max_len,
             )
-            out_df = chunk[["id1", "id2"]]
-            out_df["probs"] = probs
-            writer.write(out_df)
+            writer.write(
+                pd.DataFrame({"id1": chunk["id1"], "id2": chunk["id2"], "prob": probs})
+            )
 
     run_time = time.time() - start_time
     os.system("echo %s %f >> log.txt" % (run_tag, run_time))
