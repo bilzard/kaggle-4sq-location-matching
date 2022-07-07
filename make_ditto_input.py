@@ -1,6 +1,9 @@
 import argparse
-import pandas as pd
+
+import os.path as osp
+
 import dask.dataframe as dd
+import pandas as pd
 
 from general.util import import_by_name
 from general.profile import SimpleTimer
@@ -54,7 +57,7 @@ def make_ditto_output(hp):
 
     timer.start("saving output to file")
     result[["left", "right", "matched"]].to_parquet(
-        "ditto/", name_function=lambda x: f"ditto.{x}.parquet"
+        osp.join(hp.output_path, "ditto/"), name_function=lambda x: f"ditto.{x}.parquet"
     )
     timer.endshow()
 
