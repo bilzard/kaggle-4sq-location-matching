@@ -7,7 +7,8 @@ from general.tabular import save_to_chunks
 
 
 def prune_by_threshold(preds, distances, threshold):
-    preds = preds.copy()
+    preds = np.array(preds)
+    distances = np.array(distances)
     # keep distance only less than threshold
     for i in range(len(preds)):
         min_dist = distances[i].min()
