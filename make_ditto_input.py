@@ -51,8 +51,8 @@ def make_ditto_output(hp):
     pairs = pairs.query("id1 != id2")
 
     result = pairs.merge(
-        text.rename(columns={"id": "id1", "text": "left"}), on="id1"
-    ).merge(text.rename(columns={"id": "id2", "text": "right"}), on="id2")
+        text.rename(columns={"id": "id1", "text": "left"}), on="id1", how="left"
+    ).merge(text.rename(columns={"id": "id2", "text": "right"}), on="id2", how="left")
     result["matched"] = 0
 
     print("First few lines of final output:")
@@ -60,7 +60,7 @@ def make_ditto_output(hp):
 
     print("Saving output to file...")
     with ProgressBar():
-        result[["left", "right", "matched"]].to_parquet(
+        result.to_parquet(
             osp.join(hp.output_path, "ditto"),
             name_function=lambda x: f"ditto.{x}.parquet",
         )
