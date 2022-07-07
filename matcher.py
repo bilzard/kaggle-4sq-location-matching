@@ -39,7 +39,7 @@ def make_run_tag(hp):
     return run_tag
 
 
-def classify(sentences, model, pbar, batch_size=256, lm="distilbert", max_len=256):
+def classify(sentences, model, batch_size=256, lm="distilbert", max_len=256):
     """Apply the MRPC model.
 
     Args:
@@ -62,12 +62,11 @@ def classify(sentences, model, pbar, batch_size=256, lm="distilbert", max_len=25
     # prediction
     all_probs = []
     with torch.no_grad():
-        for batch in iterator:
+        for batch in tqdm(iterator):
             x, _ = batch
             logits = model(x)
             probs = logits.softmax(dim=1)[:, 1]
             all_probs += probs.cpu().numpy().tolist()
-            pbar.update(x.shape[0])
 
     return all_probs
 
@@ -96,11 +95,9 @@ def predict(
         None
     """
     start_time = time.time()
-    total_inputs = count_lines(input_path)
     writer = ChunkedCsvWriter(osp.join(output_path, "matched.csv.gz"))
 
     with pd.read_csv(input_path, compression="gzip", chunksize=chunk_size) as reader:
-        pbar = tqdm(total=total_inputs)
         for chunk in reader:
             sentences = chunk.apply(
                 lambda x: "\t".join([x["left"], x["right"], str(x["matched"])]), axis=1
@@ -109,7 +106,6 @@ def predict(
             probs = classify(
                 sentences,
                 model,
-                pbar,
                 batch_size=batch_size,
                 lm=lm,
                 max_len=max_len,
