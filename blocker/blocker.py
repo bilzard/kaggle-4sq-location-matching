@@ -7,11 +7,12 @@ from general.tabular import save_to_chunks
 
 
 def prune_by_threshold(preds, distances, threshold):
-    assert len(preds) == len(distances), f"{len(preds), len(distances)}"
-    preds = np.array(preds)
-    distances = np.array(distances)
     # keep distance only less than threshold
     for i in range(len(preds)):
+        assert len(preds[i]) == len(distances[i]), f"{len(preds[i]), len(distances[i])}"
+        preds[i] = np.array(preds[i])
+        distances[i] = np.array(distances[i])
+
         min_dist = distances[i].min()
         do_keep = (distances[i] < threshold) | (distances[i] == min_dist)
         preds[i] = preds[i][do_keep]
