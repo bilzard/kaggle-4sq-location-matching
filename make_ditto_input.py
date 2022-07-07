@@ -60,7 +60,7 @@ def make_ditto_output(hp):
     print("Saving output to file...")
     with ProgressBar():
         result[["left", "right", "matched"]].to_parquet(
-            osp.join(hp.output_path, "ditto/"),
+            osp.join(hp.output_path, "ditto"),
             name_function=lambda x: f"ditto.{x}.parquet",
         )
 
