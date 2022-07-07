@@ -42,6 +42,7 @@ def make_ditto_output(hp):
     preds = dd.read_parquet(hp.preds_path)[["id", "preds"]]
     pairs = preds.explode("preds")
     pairs = pairs.rename(columns={"id": "id1", "preds": "id2"})
+    pairs = pairs.query("id1 != id2")
 
     result = pairs.merge(
         text.rename(columns={"id": "id1", "text": "left"}), on="id1"
