@@ -3,6 +3,7 @@ from tqdm import tqdm
 
 from blocker.util import *
 from general.profile import SimpleTimer
+from general.tabular import save_to_chunks
 
 
 def do_blocking(
@@ -12,14 +13,6 @@ def do_blocking(
     hp,
     cfg,
 ):
-    # index to id
-    df = df.reset_index()
-    df[["index", "id"]].to_csv(
-        osp.join(hp.output_path, "index2id.csv.gz"), compression="gzip", index=False
-    )
-    df["id"] = df["index"]
-    df.drop("index", axis=1, inplace=True)
-
     grouped = df.groupby(cfg.h3_col)
     h3_to_count = df.value_counts(cfg.h3_col)
     origin_to_search_point = {
@@ -137,15 +130,14 @@ def do_blocking(
     stat_df = pd.DataFrame({cfg.h3_col: h3_ids, "recall": recalls, "weight": weights})
     timer.endshow()
 
-    timer.start("saving csv file")
-    preds_df.to_csv(
-        osp.join(hp.output_path, f"preds_{hp.blocker_type}_k{hp.k_neighbor}.csv.gz"),
-        compression="gzip",
-        index=False,
+    timer.start("saving parquet file")
+    save_to_chunks(
+        preds_df,
+        osp.join(hp.output_path, f"preds_{hp.blocker_type}_k{hp.k_neighbor}"),
+        chunk_size=hp.hunk_size,
     )
-    stat_df.to_csv(
-        osp.join(hp.output_path, f"stat_{hp.blocker_type}_k{hp.k_neighbor}.csv.gz"),
-        compression="gzip",
+    stat_df.to_parquet(
+        osp.join(hp.output_path, f"stat_{hp.blocker_type}_k{hp.k_neighbor}.parquet"),
         index=False,
     )
     timer.endshow()
