@@ -16,7 +16,8 @@ def prune_by_threshold(preds, distances, threshold):
         min_dist = distances[i].min()
         do_keep = (distances[i] < threshold) | (distances[i] == min_dist)
         preds[i] = preds[i][do_keep]
-    return preds
+        distances[i] = distances[i][do_keep]
+    return preds, distances
 
 
 def do_blocking(
@@ -94,7 +95,7 @@ def do_blocking(
             preds, distances = predictor.predict(search, query, idx2id)
 
             # prune by threshold
-            preds = prune_by_threshold(
+            preds, distances = prune_by_threshold(
                 preds, distances, cfg.blocker_thresholds[hp.blocker_type]
             )
 
