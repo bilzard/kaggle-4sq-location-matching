@@ -5,6 +5,7 @@ import time
 from multiprocessing import cpu_count
 
 import jsonlines
+import pandas as pd
 import torch
 import wandb
 
@@ -20,6 +21,7 @@ from ditto_light.train_util import (
     set_open_func,
     count_lines,
 )
+from general.tabular import ChunkedCsvWriter
 from general.util import as_chunks
 
 
@@ -94,20 +96,26 @@ def predict(
     """
     start_time = time.time()
     total_inputs = count_lines(input_path)
-    with set_open_func(input_path)(input_path, "rt") as reader, jsonlines.open(
-        output_path, mode="w"
-    ) as writer:
+    writer = ChunkedCsvWriter(output_path)
+
+    with pd.read_csv(input_path, compression="gzip", chunksize=chunk_size) as reader:
         pbar = tqdm(total=total_inputs)
-        for chunks in as_chunks(reader, chunk_size):
+        for chunk in reader:
+            sentences = chunk.apply(
+                lambda x: "\t".join([x["left"], x["right"], str(x["matched"])]), axis=1
+            ).to_numpy()
+
             probs = classify(
-                chunks,
+                sentences,
                 model,
                 pbar,
                 batch_size=batch_size,
                 lm=lm,
                 max_len=max_len,
             )
-            writer.write_all(probs)
+            out_df = chunk[["id1", "id2"]]
+            out_df["probs"] = probs
+            writer.write(out_df)
 
     run_time = time.time() - start_time
     os.system("echo %s %f >> log.txt" % (run_tag, run_time))

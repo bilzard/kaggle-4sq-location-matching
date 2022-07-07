@@ -47,3 +47,18 @@ def save_to_chunks(df, path, name_function, chunk_size=1024 * 256):
     if total_len - chunk_size * num_chunks > 0:
         chunk = df.loc[num_chunks * chunk_size :]
         chunk.to_parquet(osp.join(path, name_function(num_chunks)), index=False)
+
+
+class ChunkedCsvWriter:
+    def __init__(self, output_path):
+        self.output_path = output_path
+        self.first_time = True
+
+    def write(self, df):
+        df.to_csv(
+            osp.join(self.output_path),
+            compression="gzip",
+            index=False,
+            mode="w" if self.first_time else "a",
+            header=self.first_time,
+        )
