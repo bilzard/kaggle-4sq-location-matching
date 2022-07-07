@@ -30,7 +30,6 @@ def make_ditto_output(hp):
     print(input_df.head())
 
     input_df = dd.from_pandas(input_df, chunksize=10)
-    timer.start("make text columns")
     input_df["text"] = input_df.apply(
         lambda x: " ".join(
             [f"COL {col} VAL {x[col]}" for col in cfg.text_cols]
@@ -42,7 +41,6 @@ def make_ditto_output(hp):
     print("Computing ditto text columns...")
     with ProgressBar():
         text = input_df[["id", "text"]].compute()
-    timer.endshow()
 
     del input_df
 
@@ -59,11 +57,12 @@ def make_ditto_output(hp):
     print("First few lines of final output:")
     print(result.head())
 
-    timer.start("saving output to file")
-    result[["left", "right", "matched"]].to_parquet(
-        osp.join(hp.output_path, "ditto/"), name_function=lambda x: f"ditto.{x}.parquet"
-    )
-    timer.endshow()
+    print("Saving output to file...")
+    with ProgressBar():
+        result[["left", "right", "matched"]].to_parquet(
+            osp.join(hp.output_path, "ditto/"),
+            name_function=lambda x: f"ditto.{x}.parquet",
+        )
 
 
 if __name__ == "__main__":
