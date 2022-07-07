@@ -128,7 +128,7 @@ def do_blocking(
         {"id": ids_flat, "preds": preds_flat, "distances": distances_flat}
     )
     preds_df.to_csv(
-        osp.join(hp.output_path, f"preds_{hp.blocker_type}_k{hp.k_neighbor}.csv.gz"),
+        osp.join(hp.output_path, f"preds_{hp.blocker_type}.csv.gz"),
         compression="gzip",
         index=False,
     )
@@ -139,7 +139,7 @@ def do_blocking(
     if hp.evaluate:
         stat_df["recall"] = recalls
     stat_df.to_csv(
-        osp.join(hp.output_path, f"stat_{hp.blocker_type}_k{hp.k_neighbor}.csv.gz"),
+        osp.join(hp.output_path, f"stat_{hp.blocker_type}.csv.gz"),
         compression="gzip",
         index=False,
     )
