@@ -29,7 +29,7 @@ def make_ditto_output(hp):
     print("Preprocessed dataframe:")
     print(input_df.head())
 
-    input_df = dd.from_pandas(input_df, chunksize=10)
+    input_df = dd.from_pandas(input_df, chunksize=1024 * 256)
     input_df["text"] = input_df.apply(
         lambda x: " ".join(
             [f"COL {col} VAL {x[col]}" for col in cfg.text_cols]
