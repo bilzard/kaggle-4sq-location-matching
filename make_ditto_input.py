@@ -44,7 +44,7 @@ def make_ditto_output(hp):
     first_time = True
     pbar = tqdm(total=len(text))
     for preds in pd.read_csv(
-        hp.preds_path, usecols=["id", "preds"], chunksize=1024 * 16
+        hp.preds_path, usecols=["id", "preds"], chunksize=1024 * 64
     ):
         preds["preds"] = preds["preds"].apply(lambda x: eval(x))
         pairs = preds.explode("preds")
