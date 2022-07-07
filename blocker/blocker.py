@@ -7,6 +7,7 @@ from general.tabular import save_to_chunks
 
 
 def prune_by_threshold(preds, distances, threshold):
+    assert len(preds) == len(distances), f"{len(preds), len(distances)}"
     preds = np.array(preds)
     distances = np.array(distances)
     # keep distance only less than threshold
@@ -14,8 +15,7 @@ def prune_by_threshold(preds, distances, threshold):
         min_dist = distances[i].min()
         do_keep = (distances[i] < threshold) | (distances[i] == min_dist)
         preds[i] = preds[i][do_keep]
-        distances[i] = distances[i][do_keep]
-    return preds, distances
+    return preds
 
 
 def do_blocking(
@@ -93,7 +93,7 @@ def do_blocking(
             preds, distances = predictor.predict(search, query, idx2id)
 
             # prune by threshold
-            preds, distances = prune_by_threshold(
+            preds = prune_by_threshold(
                 preds, distances, cfg.blocker_thresholds[hp.blocker_type]
             )
 
