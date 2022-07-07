@@ -5,6 +5,8 @@ import os.path as osp
 import dask.dataframe as dd
 import pandas as pd
 
+from dask.diagnostics import ProgressBar
+
 from general.util import import_by_name
 from general.profile import SimpleTimer
 
@@ -37,7 +39,9 @@ def make_ditto_output(hp):
         axis=1,
         meta=(None, "str"),
     )
-    text = input_df[["id", "text"]].compute()
+    print("Computing ditto text columns...")
+    with ProgressBar():
+        text = input_df[["id", "text"]].compute()
     timer.endshow()
 
     del input_df
