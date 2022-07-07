@@ -27,7 +27,7 @@ def make_submission(hp):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--preds_paths", nargs="+", required=True)
+    parser.add_argument("--preds_paths", action="append", required=True)
     parser.add_argument("--config", type=str, default="base")
     parser.add_argument("--output_path", type=str, default="./output")
     parser.add_argument("--chunk_size", type=int, default=1024 * 256)
