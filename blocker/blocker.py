@@ -2,6 +2,7 @@ import os.path as osp
 from tqdm import tqdm
 
 from blocker.util import *
+from general.profile import SimpleTimer
 
 
 def do_blocking(
@@ -26,6 +27,7 @@ def do_blocking(
     }
     point_set = set(df[cfg.h3_col].unique().tolist())
     logger = Logger()
+    timer = SimpleTimer()
 
     recalls = []
     weights = []
@@ -120,17 +122,22 @@ def do_blocking(
             print(f"approximate score: {score:.4f}")
         print(f"processed: {sum(weights) / len(df):.4f}")
 
+    timer.start("flatten result")
     preds_flat, ids_flat, distances_flat = [], [], []
     for ids, preds, distances in zip(ids_list, preds_list, distances_list):
         preds_flat.extend(preds)
         ids_flat.extend(ids)
         distances_flat.extend(distances)
+    timer.endshow()
 
+    timer.start("making dataframe")
     preds_df = pd.DataFrame(
         {"id": ids_flat, "preds": preds_flat, "distances": distances_flat}
     )
     stat_df = pd.DataFrame({cfg.h3_col: h3_ids, "recall": recalls, "weight": weights})
+    timer.endshow()
 
+    timer.start("saving csv file")
     preds_df.to_csv(
         osp.join(hp.output_path, f"preds_{hp.blocker_type}_k{hp.k_neighbor}.csv.gz"),
         compression="gzip",
@@ -141,3 +148,4 @@ def do_blocking(
         compression="gzip",
         index=False,
     )
+    timer.endshow()
