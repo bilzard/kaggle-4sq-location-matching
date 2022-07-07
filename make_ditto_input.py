@@ -49,7 +49,6 @@ def make_ditto_output(hp):
         preds["preds"] = preds["preds"].apply(lambda x: eval(x))
         pairs = preds.explode("preds")
         pairs = pairs.rename(columns={"id": "id1", "preds": "id2"})
-        pairs = pairs.query("id1 != id2")
 
         result = pairs.merge(
             text.rename(columns={"id": "id1", "text": "left"}), on="id1", how="left"
