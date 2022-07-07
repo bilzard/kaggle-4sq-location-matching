@@ -44,8 +44,8 @@ def make_ditto_output(hp):
 
     del input_df
 
-    print(f"{hp.preds_path}")
-    preds = dd.read_parquet(hp.preds_path)[["id", "preds"]]
+    print(f"{hp.preds_prefix}")
+    preds = dd.read_parquet(f"{hp.preds_prefix}.*.parquet")[["id", "preds"]]
     pairs = preds.explode("preds")
     pairs = pairs.rename(columns={"id": "id1", "preds": "id2"})
     pairs = pairs.query("id1 != id2")
@@ -69,7 +69,7 @@ def make_ditto_output(hp):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", type=str)
-    parser.add_argument("preds_path", type=str)
+    parser.add_argument("preds_prefix", type=str)
     parser.add_argument("--config", type=str, default="base")
     parser.add_argument("--output_path", type=str, default="./output")
     parser.add_argument("--preprocessor", type=str, default="ppm_v0")
