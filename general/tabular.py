@@ -40,9 +40,10 @@ def sort_by_categorical(df, col):
 
 def save_to_chunks(df, path, name_function, chunk_size=1024 * 256):
     total_len = len(df)
-    for i in range(total_len // chunk_size):
+    num_chunks = total_len // chunk_size
+    for i in range(num_chunks):
         chunk = df.loc[i * chunk_size : (i + 1) * chunk_size]
         chunk.to_parquet(osp.join(path, name_function(i)), index=False)
-    if total_len - chunk_size * i > 0:
-        chunk = df.loc[(i + 1) * chunk_size :]
-        chunk.to_parquet(osp.join(path, name_function(i + 1)), index=False)
+    if total_len - chunk_size * num_chunks > 0:
+        chunk = df.loc[num_chunks * chunk_size :]
+        chunk.to_parquet(osp.join(path, name_function(num_chunks)), index=False)
