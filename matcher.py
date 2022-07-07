@@ -20,7 +20,6 @@ from ditto_light.dataset import DittoDataset
 from ditto_light.train_util import (
     seed_everything,
     set_open_func,
-    count_lines,
 )
 from general.tabular import ChunkedCsvWriter
 from general.util import as_chunks
@@ -76,10 +75,10 @@ def predict(
     output_path,
     model,
     run_tag,
-    chunk_size=1024 * 128,
-    lm="distilbert",
-    max_len=256,
-    batch_size=256,
+    chunk_size,
+    lm,
+    max_len,
+    batch_size,
 ):
     """Run the model over the input file containing the candidate entry pairs
 
@@ -143,6 +142,7 @@ def tune_threshold(model, hp):
         "tmp.jsonl",
         model,
         hp.run_tag,
+        chunk_size=hp.chunk_size,
         max_len=hp.max_len,
         lm=hp.lm,
         batch_size=hp.batch_size,
@@ -213,6 +213,7 @@ def match(hp):
         hp.output_path,
         model,
         hp.run_tag,
+        chunk_size=hp.chunk_size,
         max_len=hp.max_len,
         lm=hp.lm,
         batch_size=hp.batch_size,
