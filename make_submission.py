@@ -29,7 +29,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", type=str, default="base")
     parser.add_argument("--output_path", type=str, default="./output")
     parser.add_argument("--chunk_size", type=int, default=1024 * 256)
-    parser.add_argument("--threshold", type=int, default=0.5)
+    parser.add_argument("--threshold", type=float, default=0.5)
 
     hp = parser.parse_args()
 
