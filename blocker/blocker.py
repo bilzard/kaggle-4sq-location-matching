@@ -11,6 +11,14 @@ def do_blocking(
     hp,
     cfg,
 ):
+    # index to id
+    df = df.reset_index()
+    df[["index", "id"]].to_csv(
+        osp.join(hp.output_path, "index2id.csv.gz"), compression="gzip", index=False
+    )
+    df["id"] = df["index"]
+    df.drop("index", axis=1, inplace=True)
+
     grouped = df.groupby(cfg.h3_col)
     h3_to_count = df.value_counts(cfg.h3_col)
     origin_to_search_point = {
