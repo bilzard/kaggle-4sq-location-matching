@@ -6,6 +6,17 @@ from general.profile import SimpleTimer
 from general.tabular import save_to_chunks
 
 
+def prune_by_threshold(preds, distances, threshold):
+    preds = preds.copy()
+    # keep distance only less than threshold
+    for i in range(len(preds)):
+        min_dist = distances[i].min()
+        do_keep = (distances[i] < threshold) | (distances[i] == min_dist)
+        preds[i] = preds[i][do_keep]
+        distances[i] = distances[i][do_keep]
+    return preds, distances
+
+
 def do_blocking(
     df,
     embeddings_list,
@@ -79,6 +90,12 @@ def do_blocking(
 
             idx2id = search_df["id"].to_dict()
             preds, distances = predictor.predict(search, query, idx2id)
+
+            # prune by threshold
+            preds, distances = prune_by_threshold(
+                preds, distances, cfg.blocker_thresholds[hp.blocker_type]
+            )
+
         else:
             logger.log("Skip calculating Embeddings:")
             preds = search_df["id"].to_numpy().reshape(1, -1).tolist()
