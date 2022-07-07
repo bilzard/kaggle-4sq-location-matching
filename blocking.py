@@ -4,8 +4,6 @@ import os.path as osp
 import numpy as np
 import pandas as pd
 
-from general.tabular import show_memory_usage
-from general.util import import_by_name
 from blocker.util import (
     create_gpos_cartesian,
     create_gpos_haversine,
@@ -13,6 +11,9 @@ from blocker.util import (
     normalize_L2,
 )
 from blocker.blocker import do_blocking
+from general.tabular import show_memory_usage
+from general.util import import_by_name
+from general.profile import SimpleTimer
 
 
 def load_data(hp, cfg):
@@ -70,12 +71,13 @@ def transform_embeddings_list(embeddings_list_src, embeddings_list_dst):
 
 def block(hp):
     cfg = import_by_name(f"config.{hp.config}", "cfg")
-
     input_df = load_data(hp, cfg)
+    timer = SimpleTimer()
 
     print("Normalize embeddings:")
     embeddings_list = load_embeddings_list(hp, cfg, input_df)
     if hp.blocker_type in {"combination", "text"}:
+        timer.start("normalizing embeddings")
         embeddings_list_norm = [
             np.memmap(
                 osp.join(hp.output_path, f"embeddings_{col}_norm.mmp"),
@@ -91,6 +93,7 @@ def block(hp):
         if hp.blocker_type == "combination":
             embeddings_list_norm += [embeddings_list[-1]]
         transform_embeddings_list(embeddings_list[:2], embeddings_list_norm[:2])
+        timer.endshow()
 
     print("Blocking:")
     do_blocking(
