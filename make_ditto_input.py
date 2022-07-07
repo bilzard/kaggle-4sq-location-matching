@@ -50,6 +50,10 @@ def make_ditto_output(hp):
     pairs = pairs.rename(columns={"id": "id1", "preds": "id2"})
     pairs = pairs.query("id1 != id2")
 
+    print("Computing pairs...")
+    with ProgressBar():
+        pairs = pairs.compute()
+
     result = pairs.merge(
         text.rename(columns={"id": "id1", "text": "left"}), on="id1", how="left"
     ).merge(text.rename(columns={"id": "id2", "text": "right"}), on="id2", how="left")
