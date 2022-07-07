@@ -2,10 +2,9 @@ import argparse
 
 import os.path as osp
 
-import dask.dataframe as dd
 import pandas as pd
 
-from dask.diagnostics import ProgressBar
+from tqdm import tqdm
 
 from general.util import import_by_name
 from general.profile import SimpleTimer
@@ -29,41 +28,48 @@ def make_ditto_output(hp):
     print("Preprocessed dataframe:")
     print(input_df.head())
 
-    input_df = dd.from_pandas(input_df, chunksize=1024 * 16)
-    input_df["text"] = input_df.apply(
+    tqdm.pandas()
+    print("Computing ditto text columns...")
+    input_df["text"] = input_df.progress_apply(
         lambda x: " ".join(
             [f"COL {col} VAL {x[col]}" for col in cfg.text_cols]
             + [f"COL {col} VAL {x[col]:3f}" for col in cfg.num_cols]
         ),
         axis=1,
-        meta=(None, "str"),
     )
-    print("Computing ditto text columns...")
-    with ProgressBar():
-        text = input_df[["id", "text"]].compute()
+    text = input_df[["id", "text"]]
 
     del input_df
 
-    print(f"{hp.preds_path}")
-    preds = dd.read_parquet(hp.preds_path)[["id", "preds"]]
-    pairs = preds.explode("preds")
-    pairs = pairs.rename(columns={"id": "id1", "preds": "id2"})
-    pairs = pairs.query("id1 != id2")
+    first_time = True
+    pbar = tqdm(total=len(text))
+    for preds in pd.read_csv(
+        hp.preds_path, usecols=["id", "preds"], chunksize=1024 * 16
+    ):
+        preds["preds"] = preds["preds"].apply(lambda x: eval(x))
+        pairs = preds.explode("preds")
+        pairs = pairs.rename(columns={"id": "id1", "preds": "id2"})
+        pairs = pairs.query("id1 != id2")
 
-    result = pairs.merge(
-        text.rename(columns={"id": "id1", "text": "left"}), on="id1", how="left"
-    ).merge(text.rename(columns={"id": "id2", "text": "right"}), on="id2", how="left")
-    result["matched"] = 0
-
-    print("First few lines of final output:")
-    print(result.head())
-
-    print("Saving output to file...")
-    with ProgressBar():
-        result.to_parquet(
-            osp.join(hp.output_path, "ditto"),
-            name_function=lambda x: f"ditto.{x}.parquet",
+        result = pairs.merge(
+            text.rename(columns={"id": "id1", "text": "left"}), on="id1", how="left"
+        ).merge(
+            text.rename(columns={"id": "id2", "text": "right"}), on="id2", how="left"
         )
+        result["matched"] = 0
+
+        result.to_csv(
+            osp.join(hp.output_path, "ditto.csv.gz"),
+            compression="gzip",
+            index=False,
+            mode="w" if first_time else "a",
+            header=first_time,
+        )
+        pbar.update(len(preds))
+        if first_time:
+            print("First Few lines of result")
+            print(result.head())
+            first_time = False
 
 
 if __name__ == "__main__":
