@@ -15,8 +15,8 @@ def prune_by_threshold(preds, distances, threshold):
 
         min_dist = distances[i].min()
         do_keep = (distances[i] < threshold) | (distances[i] == min_dist)
-        preds[i] = preds[i][do_keep]
-        distances[i] = distances[i][do_keep]
+        preds[i] = preds[i][do_keep].tolist()
+        distances[i] = distances[i][do_keep].tolist()
     return preds, distances
 
 
