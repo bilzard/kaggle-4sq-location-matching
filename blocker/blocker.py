@@ -135,7 +135,6 @@ def do_blocking(
         preds_df,
         hp.output_path,
         name_function=lambda x: f"preds_{hp.blocker_type}_k{hp.k_neighbor}.{x}.parquet",
-        chunk_size=hp.hunk_size,
     )
     stat_df.to_parquet(
         osp.join(hp.output_path, f"stat_{hp.blocker_type}_k{hp.k_neighbor}.parquet"),
