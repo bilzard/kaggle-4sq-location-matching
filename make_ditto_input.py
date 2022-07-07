@@ -47,6 +47,7 @@ def make_ditto_output(hp):
     result = pairs.merge(
         text.rename(columns={"id": "id1", "text": "left"}), on="id1"
     ).merge(text.rename(columns={"id": "id2", "text": "right"}), on="id2")
+    result["matched"] = 0
 
     print("First few lines of final output:")
     print(result.head())
