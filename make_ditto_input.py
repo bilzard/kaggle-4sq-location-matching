@@ -44,6 +44,7 @@ def make_ditto_output(hp):
 
     del input_df
 
+    print(f"{hp.preds_path}")
     preds = dd.read_parquet(hp.preds_path)[["id", "preds"]]
     pairs = preds.explode("preds")
     pairs = pairs.rename(columns={"id": "id1", "preds": "id2"})
