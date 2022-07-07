@@ -123,19 +123,21 @@ def do_blocking(
         distances_flat.extend(distances)
     timer.endshow()
 
-    timer.start("making dataframe")
+    timer.start("making & saving preds")
     preds_df = pd.DataFrame(
         {"id": ids_flat, "preds": preds_flat, "distances": distances_flat}
     )
-    stat_df = pd.DataFrame({cfg.h3_col: h3_ids, "recall": recalls, "weight": weights})
-    timer.endshow()
-
-    timer.start("saving parquet file")
     preds_df.to_csv(
         osp.join(hp.output_path, f"preds_{hp.blocker_type}_k{hp.k_neighbor}.csv.gz"),
         compression="gzip",
         index=False,
     )
+    timer.endshow()
+
+    timer.start("making & saving stat")
+    stat_df = pd.DataFrame({cfg.h3_col: h3_ids, "weight": weights})
+    if hp.evaluate:
+        stat_df["recall"] = recalls
     stat_df.to_csv(
         osp.join(hp.output_path, f"stat_{hp.blocker_type}_k{hp.k_neighbor}.csv.gz"),
         compression="gzip",
