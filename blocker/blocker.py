@@ -133,8 +133,8 @@ def do_blocking(
     timer.start("saving parquet file")
     save_to_chunks(
         preds_df,
-        hp.output_path,
-        name_function=lambda x: f"preds_{hp.blocker_type}_k{hp.k_neighbor}.{x}.parquet",
+        osp.join(hp.output_path, f"preds_{hp.blocker_type}_k{hp.k_neighbor}"),
+        name_function=lambda x: f"{x}.parquet",
     )
     stat_df.to_parquet(
         osp.join(hp.output_path, f"stat_{hp.blocker_type}_k{hp.k_neighbor}.parquet"),
