@@ -1,5 +1,6 @@
 import argparse
 import os
+import os.path as osp
 import time
 
 from multiprocessing import cpu_count
@@ -96,7 +97,7 @@ def predict(
     """
     start_time = time.time()
     total_inputs = count_lines(input_path)
-    writer = ChunkedCsvWriter(output_path)
+    writer = ChunkedCsvWriter(osp.join(output_path, "matched.csv.gz"))
 
     with pd.read_csv(input_path, compression="gzip", chunksize=chunk_size) as reader:
         pbar = tqdm(total=total_inputs)
@@ -228,7 +229,7 @@ if __name__ == "__main__":
     parser.add_argument("checkpoint_path", type=str)
     parser.add_argument("--val_path", type=str, default=None)
     parser.add_argument("--threshold", type=float, default=0.5)
-    parser.add_argument("--output_path", type=str, default="output/result.jsonl")
+    parser.add_argument("--output_path", type=str, default="./output")
     parser.add_argument("--lm", type=str, default="distilbert")
     parser.add_argument("--use_gpu", dest="use_gpu", action="store_true")
     parser.add_argument("--fp16", dest="fp16", action="store_true")
