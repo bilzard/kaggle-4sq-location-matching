@@ -39,8 +39,8 @@ def sort_by_categorical(df, col):
 def save_to_chunks(df, prefix, chunk_size=1024 * 256):
     total_len = len(df)
     for i in range(total_len // chunk_size):
-        chunk = df.iloc[i * chunk_size : (i + 1) * chunk_size]
+        chunk = df.loc[i * chunk_size : (i + 1) * chunk_size]
         chunk.to_parquet(f"{prefix}.{i}.parquet", index=False)
     if total_len - chunk_size * i > 0:
-        chunk = df.iloc[(i + 1) * chunk_size :]
+        chunk = df.loc[(i + 1) * chunk_size :]
         chunk.to_parquet(f"{prefix}.{i + 1}.parquet", index=False)
