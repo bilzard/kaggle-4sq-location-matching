@@ -20,7 +20,7 @@ def make_submission(hp):
         union_preds = (
             pd.concat(preds_list, axis=0)
             .groupby("id")
-            .agg(preds=("preds", lambda x: list[set.union(*x)]))
+            .agg(preds=("preds", lambda x: list(set.union(*x))))
         ).reset_index()
         writer.write(union_preds)
 
