@@ -51,6 +51,8 @@ This repository is source code of my solution in a Kaggle competition [Foursquar
 - [combination, k=25](https://www.kaggle.com/code/tatamikenn/4sq-submit-combination-offline)
 - [union(text, location, combination), k=(18, 5, 7)](https://www.kaggle.com/code/tatamikenn/4sq-submit-union-c-t-l-18-5-7-offline)
 
+Note: they are **not ranked** because of Notebook Error (probably memory overflow).
+
 ## Training
 
 ```console
