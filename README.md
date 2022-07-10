@@ -47,6 +47,13 @@ This repository is source code of my solution in a Kaggle competition [Foursquar
 <a href="https://ibb.co/TwX9Q40"><img src="https://i.ibb.co/sgS8TK1/validation-result-blocker.png" alt="validation-result-blocker" border="0"></a>
 ### Matcher
 
+**Note**: The below W&B graph is evaluation result of a tiny subset of test set (~5K). For the full-set evaluation result is IoU=**0.89393**
+
+```
+val/f1=0.94399, val/recall=0.94882, val/precision=0.93921, val/iou=0.89393, val/threshold=0.4000
+```
+
+
 <a href="https://ibb.co/ykb1GTh"><img src="https://i.ibb.co/wQxX3HJ/validation-result-matcher.png" alt="validation-result-matcher" border="0"></a>
 
 ## Inference Notebooks
