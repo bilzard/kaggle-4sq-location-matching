@@ -41,6 +41,8 @@ This repository is source code of my solution in a Kaggle competition [Foursquar
   - train: 1,346,336
   - test: 1,344,027
 
+the source code is under `./make_training_set`.
+
 ## Local Validation Result
 ### Blocker
 
@@ -75,7 +77,7 @@ $ train_ditto.py /content/data/ditto_dev_feat_all_n25_seed1234_full.tsv.gz /cont
 
 - [x] include inference code
 - [x] include training code
-- [ ] include code to generate training dataset for matcher
+- [x] include code to generate training dataset for matcher
 ## Attribution
 
 This repository is based on the code of [Ditto].
