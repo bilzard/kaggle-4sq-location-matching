@@ -44,7 +44,9 @@ This repository is source code of my solution in a Kaggle competition [Foursquar
 ## Local Validation Result
 ### Blocker
 
-<a href="https://ibb.co/TwX9Q40"><img src="https://i.ibb.co/sgS8TK1/validation-result-blocker.png" alt="validation-result-blocker" border="0"></a>
+The maximum Recall=0.9825 is achieved by n_neighbor=85.695.
+
+<a href="https://ibb.co/Ln7vsSm"><img src="https://i.ibb.co/GcSFr7y/validation-result-blocker.png" alt="validation-result-blocker" border="0"></a>
 ### Matcher
 
 **Note**: The below W&B graph is evaluation result of a tiny subset of test set (~5K). For the full-set evaluation result is IoU=**0.89393**
