@@ -31,11 +31,11 @@ This repository is source code of my solution in a Kaggle competition [Foursquar
 - preprocess
   - drop rows with blank or nan `name`
   - drop POIs with a single location ID
-- sample selecting scheme
-  - positive set
-    - randomly sampled 2 samples from each POIs
-  - negative set
-    - randomly sampled 6 samples from nearest 25 samples excluding matched samples
+- pair selecting scheme
+  - positive pair
+    - randomly sampled 1 samples from each POIs, making 1 pair per POI
+  - negative pair
+    - randomly sampled 6 samples from nearest 25 samples excluding matched samples, making 6 pairs per POI
       - distance metrics are calculated only on text (`name`, `categories`)
 - actual number of samples
   - train: 1,346,336
