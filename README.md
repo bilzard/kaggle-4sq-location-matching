@@ -24,21 +24,24 @@ This repository is source code of my solution in a Kaggle competition [Foursquar
 [H3]: https://github.com/uber/h3
 [Optuna]: https://github.com/optuna/optuna
 
-## Local Validation Result
+## Train/Validation Set for the Matcher
 
 - train/validation Split
   - split POIs 50:50
-- train/validation set
+- preprocess
   - drop rows with blank or nan `name`
   - drop POIs with a single location ID
-  - sample selecting scheme
-    - positive set
-      - randomly sampled 2 samples from each POIs
-    - negative set
-      - randomly sampled 6 samples from nearest 25 samples excluding matched samples
-        - distance metrics are calculated only on text (`name`, `categories`)
-- Actual number of samples
-  - 
+- sample selecting scheme
+  - positive set
+    - randomly sampled 2 samples from each POIs
+  - negative set
+    - randomly sampled 6 samples from nearest 25 samples excluding matched samples
+      - distance metrics are calculated only on text (`name`, `categories`)
+- actual number of samples
+  - train: 1,346,336
+  - test: 1,344,027
+
+## Local Validation Result
 ### Blocker
 
 <a href="https://ibb.co/TwX9Q40"><img src="https://i.ibb.co/sgS8TK1/validation-result-blocker.png" alt="validation-result-blocker" border="0"></a>
