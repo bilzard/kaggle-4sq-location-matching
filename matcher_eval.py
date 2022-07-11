@@ -94,9 +94,11 @@ if __name__ == "__main__":
     parser.add_argument("--chunk_size", type=int, default=1024 * 512)
     parser.add_argument("--monitor", dest="monitor", action="store_true")
     parser.add_argument("--num_workers", type=int, default=None)
+    parser.add_argument("--task", type=str, default=None)
     hp = parser.parse_args()
 
-    hp.task = make_task_name(hp.input_path)
+    if hp.task is None:
+        hp.task = make_task_name(hp.input_path)
     hp.run_tag = make_run_tag(hp)
     if hp.num_workers is None:
         hp.num_workers = cpu_count()
