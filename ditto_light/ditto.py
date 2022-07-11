@@ -1,6 +1,8 @@
 import math
 import os
 
+from collections.abc import Iterable
+
 import torch
 import torch.nn as nn
 import numpy as np
@@ -61,7 +63,7 @@ class DittoModel(nn.Module):
         return self.fc(enc)  # .squeeze() # .sigmoid()
 
 
-def evaluate(model, iterator, threshold=None):
+def evaluate(models, iterator, threshold=None):
     """Evaluate a model on a validation/test dataset
 
     Args:
@@ -74,15 +76,18 @@ def evaluate(model, iterator, threshold=None):
         float (optional): if threshold is not provided, the threshold
             value that gives the optimal F1
     """
-    all_p = []
+    if not isinstance(models, Iterable):
+        models = [models]
     all_y = []
     all_probs = []
     with torch.no_grad():
         for batch in tqdm(iterator, desc="Evaluate"):
             x, y = batch
-            logits = model(x)
-            probs = logits.softmax(dim=1)[:, 1]
-            all_probs += probs.cpu().numpy().tolist()
+            probs_list = [
+                model(x).softmax(dim=1)[:, 1].cpu().numpy() for model in models
+            ]
+            probs = np.mean(probs_list, axis=0)
+            all_probs += probs.tolist()
             all_y += y.cpu().numpy().tolist()
 
     iou = None
