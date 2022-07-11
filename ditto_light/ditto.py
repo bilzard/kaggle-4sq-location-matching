@@ -246,7 +246,7 @@ def train(trainset, validset, hp):
             }
             torch.save(ckpt, ckpt_path)
 
-            if dev_result["iou"] > best_dev_score:
+            if hp.evaluate and (dev_result["iou"] > best_dev_score):
                 best_dev_score = dev_result["iou"]
                 log_model(ckpt_path, hp, epoch, best_dev_score, best_model=True)
             else:
