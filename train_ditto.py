@@ -28,6 +28,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("train_path", type=str)
     parser.add_argument("val_path", type=str)
+    parser.add_argument("--task", type=str, default=None)
     parser.add_argument("--run_id", type=int, default=0)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--max_len", type=int, default=256)
@@ -49,7 +50,8 @@ if __name__ == "__main__":
     # set seeds
     seed_everything(hp.run_id)
 
-    hp.task = make_task_name(hp.train_path)
+    if hp.task is None:
+        hp.task = make_task_name(hp.train_path)
     hp.run_tag = make_run_tag(hp)
     if hp.num_workers is None:
         hp.num_workers = cpu_count()
