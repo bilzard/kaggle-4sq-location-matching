@@ -225,9 +225,11 @@ def train(trainset, validset, hp):
         model.train()
         loss = train_step(train_iter, model, optimizer, scheduler, hp)
 
-        # eval
-        model.eval()
-        dev_result = evaluate(model, valid_iter)
+        dev_result = {}
+        if hp.evaluate:
+            # eval
+            model.eval()
+            dev_result = evaluate(model, valid_iter)
 
         if hp.save_model:
             # create the directory if not exist
